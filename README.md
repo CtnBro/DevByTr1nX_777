@@ -1,476 +1,245 @@
--- Tr1X Menu Sombrio com Estilo Macabro
--- Criado por Tr1nX_777 - Versão revisada e melhorada
+--[[
+Tr1X Menu Macabro - Script Completo
+Versão: 1.0
+--]]
 
+-- Serviços
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
 
+-- Player local
 local player = Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
+local character = player.Character or player.CharacterAdded:Wait()
 
--- Criação da GUI principal
-local gui = Instance.new("ScreenGui")
-gui.Name = "Tr1xMacabroMenu"
-gui.ResetOnSpawn = false
-gui.Parent = PlayerGui
+-- Remote Event
+local spawnRemote = ReplicatedStorage:WaitForChild("Spawn")
 
--- Main Frame
-local Frame = Instance.new("Frame")
-Frame.Name = "MainFrame"
-Frame.Size = UDim2.new(0, 450, 0, 360)
-Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(40, 0, 70)
-Frame.BorderSizePixel = 0
-Frame.Active = true
-Frame.Draggable = true
-Frame.Parent = gui
+-- Sons
+local clickSound = Instance.new("Sound")
+clickSound.SoundId = "rbxassetid://12222030"
+clickSound.Volume = 1
+clickSound.Parent = game.SoundService
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12)
-UICorner.Parent = Frame
+-- Função de clique com som
+local function playClickSound()
+	clickSound:Play()
+end
 
--- TopBar
-local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 30)
-TopBar.BackgroundColor3 = Color3.fromRGB(70, 0, 100)
-TopBar.BorderSizePixel = 0
-TopBar.Parent = Frame
+-- Anti-Invisibilidade após respawn
+player.CharacterAdded:Connect(function(char)
+	character = char
+end)
 
+-- GUI Principal
+local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+ScreenGui.Name = "Tr1X_Menu"
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 0, 50)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+-- Estética Macabra: Stroke e Gradiente
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(130, 0, 200)
+stroke.Thickness = 1.5
+stroke.Parent = MainFrame
+
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 0, 80)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 0, 150))
+})
+gradient.Parent = MainFrame
+
+-- Minimizar botão
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+minimizeBtn.Position = UDim2.new(1, -35, 0, 5)
+minimizeBtn.Text = "-"
+minimizeBtn.Font = Enum.Font.Antique
+minimizeBtn.TextSize = 20
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 100)
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Parent = MainFrame
+
+-- Minimizar lógica
+local minimized = false
+minimizeBtn.MouseButton1Click:Connect(function()
+	playClickSound()
+	minimized = not minimized
+	for _, v in pairs(MainFrame:GetChildren()) do
+		if v:IsA("TextButton") or v:IsA("Frame") then
+			if v ~= minimizeBtn then
+				v.Visible = not minimized
+			end
+		end
+	end
+end)
+
+-- Título
 local Title = Instance.new("TextLabel")
-Title.Text = "Tr1X Menu Macabro"
-Title.Font = Enum.Font.GothamBlack
-Title.TextColor3 = Color3.fromRGB(230, 200, 255)
-Title.TextSize = 16
+Title.Text = "Tr1X Macabro Menu"
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 10, 0, 0)
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = TopBar
+Title.Font = Enum.Font.Antique
+Title.TextScaled = true
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Parent = MainFrame
 
-local Close = Instance.new("TextButton")
-Close.Text = "-"
-Close.Font = Enum.Font.GothamBold
-Close.TextColor3 = Color3.fromRGB(230, 200, 255)
-Close.TextSize = 20
-Close.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-Close.Size = UDim2.new(0, 30, 1, 0)
-Close.Position = UDim2.new(1, -30, 0, 0)
-Close.Parent = TopBar
+-- Abas
+local Tabs = {
+	"Home", "Outfit", "Risk"
+}
+local TabFrames = {}
+local currentTab = ""
 
--- MiniIcon para reabrir o menu
-local MiniIcon = Instance.new("TextButton")
-MiniIcon.Text = "Tr1X"
-MiniIcon.Font = Enum.Font.GothamBold
-MiniIcon.TextSize = 14
-MiniIcon.TextColor3 = Color3.fromRGB(230, 200, 255)
-MiniIcon.Size = UDim2.new(0, 100, 0, 30)
-MiniIcon.Position = UDim2.new(0, 10, 1, -40)
-MiniIcon.BackgroundColor3 = Color3.fromRGB(30, 0, 50)
-MiniIcon.Visible = false
-MiniIcon.Parent = gui
+-- Criar botões de aba
+for i, name in ipairs(Tabs) do
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 120, 0, 30)
+	btn.Position = UDim2.new(0, 10 + ((i - 1) * 130), 0, 50)
+	btn.Text = name
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.BackgroundColor3 = Color3.fromRGB(60, 0, 80)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Parent = MainFrame
 
-Close.MouseButton1Click:Connect(function()
-    Frame.Visible = false
-    MiniIcon.Visible = true
-end)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1, -20, 1, -90)
+	frame.Position = UDim2.new(0, 10, 0, 90)
+	frame.BackgroundColor3 = Color3.fromRGB(40, 0, 60)
+	frame.Visible = false
+	frame.Parent = MainFrame
+	TabFrames[name] = frame
 
-MiniIcon.MouseButton1Click:Connect(function()
-    Frame.Visible = true
-    MiniIcon.Visible = false
-end)
-
--- Tab Holder
-local TabHolder = Instance.new("Frame")
-TabHolder.Size = UDim2.new(0, 110, 1, -30)
-TabHolder.Position = UDim2.new(0, 0, 0, 30)
-TabHolder.BackgroundColor3 = Color3.fromRGB(30, 0, 50)
-TabHolder.BorderSizePixel = 0
-TabHolder.Parent = Frame
-
-local Layout = Instance.new("UIListLayout")
-Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.Padding = UDim.new(0, 6)
-Layout.Parent = TabHolder
-
-local TabList = {}
-local CurrentTab
-
-local function CreateTab(name)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 30)
-    btn.Text = name
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    btn.TextColor3 = Color3.fromRGB(230, 200, 255)
-    btn.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-    btn.AutoButtonColor = false
-
-    local UICornerBtn = Instance.new("UICorner")
-    UICornerBtn.CornerRadius = UDim.new(0, 6)
-    UICornerBtn.Parent = btn
-
-    local tabFrame = Instance.new("Frame")
-    tabFrame.Size = UDim2.new(1, -110, 1, -30)
-    tabFrame.Position = UDim2.new(0, 110, 0, 30)
-    tabFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 40)
-    tabFrame.BorderSizePixel = 0
-    tabFrame.Visible = false
-    tabFrame.Parent = Frame
-
-    btn.MouseButton1Click:Connect(function()
-        for _, tab in ipairs(TabList) do
-            tab.Frame.Visible = false
-            tab.Button.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-        end
-        tabFrame.Visible = true
-        btn.BackgroundColor3 = Color3.fromRGB(90, 0, 130)
-        CurrentTab = tabFrame
-    end)
-
-    btn.Parent = TabHolder
-    table.insert(TabList, {Button = btn, Frame = tabFrame})
-    return tabFrame
+	btn.MouseButton1Click:Connect(function()
+		playClickSound()
+		for t, f in pairs(TabFrames) do
+			f.Visible = false
+		end
+		frame.Visible = true
+		currentTab = name
+	end)
 end
 
--- Criar abas principais
-local HomeTab = CreateTab("Home")
-local OutfitTab = CreateTab("Outfit")
-local RiskTab = CreateTab("Risk")
-
--- Inicializar aba visível
-HomeTab.Visible = true
-CurrentTab = HomeTab
-
-for _, tab in ipairs(TabList) do
-    if tab.Frame == CurrentTab then
-        tab.Button.BackgroundColor3 = Color3.fromRGB(90, 0, 130)
-    else
-        tab.Button.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-    end
+-- Função para criar botão dentro da aba
+local function createFunctionButton(parent, text, callback)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, -20, 0, 30)
+	btn.Position = UDim2.new(0, 10, 0, #parent:GetChildren() * 35)
+	btn.Text = text
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.BackgroundColor3 = Color3.fromRGB(90, 0, 130)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Parent = parent
+	btn.MouseButton1Click:Connect(function()
+		playClickSound()
+		callback()
+	end)
 end
 
--- Função para tocar som ao clicar nos botões
-local function playClickSound(parent, soundId)
-    local sound = Instance.new("Sound", parent)
-    sound.SoundId = soundId
-    sound.Volume = 0.5
-    sound:Play()
-    game.Debris:AddItem(sound, 2)
-end
-
--- ===== Conteúdo Aba Home =====
-
--- ESP Toggle
-local espToggle = Instance.new("TextButton")
-espToggle.Text = "ESP ON/OFF"
-espToggle.Size = UDim2.new(0, 200, 0, 30)
-espToggle.Position = UDim2.new(0, 10, 0, 10)
-espToggle.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-espToggle.TextColor3 = Color3.new(1, 1, 1)
-espToggle.Font = Enum.Font.GothamBold
-espToggle.TextSize = 14
-espToggle.Parent = HomeTab
-
-local espEnabled = false
-espToggle.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    playClickSound(espToggle, "rbxassetid://9118823109")
-    print("ESP toggled:", espEnabled)
-    -- TODO: colocar função ESP real aqui (se quiser)
+-- Funções da aba Home
+createFunctionButton(TabFrames["Home"], "Ativar ESP", function()
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= player and plr.Character then
+			local highlight = Instance.new("Highlight")
+			highlight.FillColor = Color3.fromRGB(255, 0, 255)
+			highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+			highlight.Parent = plr.Character
+		end
+	end
 end)
 
--- Fly Toggle
-local flyToggle = Instance.new("TextButton")
-flyToggle.Text = "Fly ON/OFF (CTRL)"
-flyToggle.Size = UDim2.new(0, 200, 0, 30)
-flyToggle.Position = UDim2.new(0, 10, 0, 50)
-flyToggle.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-flyToggle.TextColor3 = Color3.new(1, 1, 1)
-flyToggle.Font = Enum.Font.GothamBold
-flyToggle.TextSize = 14
-flyToggle.Parent = HomeTab
+-- Funções da aba Outfit
+createFunctionButton(TabFrames["Outfit"], "Aplicar Roupas", function()
+	local shirt = Instance.new("Shirt", character)
+	shirt.ShirtTemplate = "rbxassetid://14407676002"
+	local pants = Instance.new("Pants", character)
+	pants.PantsTemplate = "rbxassetid://14407676835"
+end)
 
+-- Funções da aba Risk
+createFunctionButton(TabFrames["Risk"], "Autodestruição", function()
+	character:BreakJoints()
+end)
+
+-- Voo com CTRL/WASD/SPACE
 local flying = false
-local flightSpeed = 50
-local bodyVelocity, bodyGyro
-local flightConnection
+local UIS = game:GetService("UserInputService")
 
-local function createFlight()
-    local character = player.Character
-    if not character then return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+local function setupFlight()
+	local bodyGyro = Instance.new("BodyGyro")
+	bodyGyro.P = 9e4
+	bodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+	bodyGyro.cframe = character.HumanoidRootPart.CFrame
+	bodyGyro.Parent = character.HumanoidRootPart
 
-    bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
-    bodyVelocity.Parent = hrp
+	local bodyVel = Instance.new("BodyVelocity")
+	bodyVel.velocity = Vector3.new(0,0,0)
+	bodyVel.maxForce = Vector3.new(9e9, 9e9, 9e9)
+	bodyVel.Parent = character.HumanoidRootPart
 
-    bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.MaxTorque = Vector3.new(0, 0, 0)
-    bodyGyro.Parent = hrp
+	local flyDir = Vector3.new()
+
+	UIS.InputBegan:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.W then
+			flyDir = flyDir + Vector3.new(0,0,-1)
+		elseif input.KeyCode == Enum.KeyCode.S then
+			flyDir = flyDir + Vector3.new(0,0,1)
+		elseif input.KeyCode == Enum.KeyCode.A then
+			flyDir = flyDir + Vector3.new(-1,0,0)
+		elseif input.KeyCode == Enum.KeyCode.D then
+			flyDir = flyDir + Vector3.new(1,0,0)
+		elseif input.KeyCode == Enum.KeyCode.Space then
+			flyDir = flyDir + Vector3.new(0,1,0)
+		end
+	end)
+
+	UIS.InputEnded:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.W then
+			flyDir = flyDir - Vector3.new(0,0,-1)
+		elseif input.KeyCode == Enum.KeyCode.S then
+			flyDir = flyDir - Vector3.new(0,0,1)
+		elseif input.KeyCode == Enum.KeyCode.A then
+			flyDir = flyDir - Vector3.new(-1,0,0)
+		elseif input.KeyCode == Enum.KeyCode.D then
+			flyDir = flyDir - Vector3.new(1,0,0)
+		elseif input.KeyCode == Enum.KeyCode.Space then
+			flyDir = flyDir - Vector3.new(0,1,0)
+		end
+	end)
+
+	while flying do
+		bodyGyro.CFrame = workspace.CurrentCamera.CFrame
+		bodyVel.velocity = workspace.CurrentCamera.CFrame:vectorToWorldSpace(flyDir * 50)
+		task.wait()
+	end
+	bodyGyro:Destroy()
+	bodyVel:Destroy()
 end
 
-local function destroyFlight()
-    if bodyVelocity then
-        bodyVelocity:Destroy()
-        bodyVelocity = nil
-    end
-    if bodyGyro then
-        bodyGyro:Destroy()
-        bodyGyro = nil
-    end
-end
-
-local moveVector = Vector3.new()
-
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if gpe then return end
-    if input.KeyCode == Enum.KeyCode.LeftControl then
-        flying = not flying
-        if flying then
-            local character = player.Character
-            if not character then return end
-            local hrp = character:FindFirstChild("HumanoidRootPart")
-            if not hrp then return end
-
-            createFlight()
-
-            bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-            bodyGyro.MaxTorque = Vector3.new(4e5, 4e5, 4e5)
-
-            flightConnection = RunService.RenderStepped:Connect(function()
-                local camCFrame = workspace.CurrentCamera.CFrame
-                local dir = Vector3.new(0, 0, 0)
-
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                    dir = dir + camCFrame.LookVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                    dir = dir - camCFrame.LookVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                    dir = dir - camCFrame.RightVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                    dir = dir + camCFrame.RightVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                    dir = dir + Vector3.new(0, 1, 0)
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                    dir = dir - Vector3.new(0, 1, 0)
-                end
-
-                if dir.Magnitude > 0 then
-                    dir = dir.Unit * flightSpeed
-                end
-
-                bodyVelocity.Velocity = dir
-                bodyGyro.CFrame = workspace.CurrentCamera.CFrame
-            end)
-        else
-            if flightConnection then
-                flightConnection:Disconnect()
-                flightConnection = nil
-            end
-            destroyFlight()
-        end
-        playClickSound(flyToggle, "rbxassetid://9118823109")
-    end
+UIS.InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.LeftControl then
+		flying = not flying
+		if flying then
+			setupFlight()
+		end
+	end
 end)
 
-flyToggle.MouseButton1Click:Connect(function()
-    -- Ativa ou desativa voar via botão também
-    flying = not flying
-    if flying then
-        local character = player.Character
-        if not character then return end
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
+-- Inicializa aba Home
+TabFrames["Home"].Visible = true
 
-        createFlight()
-
-        bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-        bodyGyro.MaxTorque = Vector3.new(4e5, 4e5, 4e5)
-
-        flightConnection = RunService.RenderStepped:Connect(function()
-            local camCFrame = workspace.CurrentCamera.CFrame
-            local dir = Vector3.new(0, 0, 0)
-
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                dir = dir + camCFrame.LookVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                dir = dir - camCFrame.LookVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                dir = dir - camCFrame.RightVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                dir = dir + camCFrame.RightVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                dir = dir + Vector3.new(0, 1, 0)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                dir = dir - Vector3.new(0, 1, 0)
-            end
-
-            if dir.Magnitude > 0 then
-                dir = dir.Unit * flightSpeed
-            end
-
-            bodyVelocity.Velocity = dir
-            bodyGyro.CFrame = workspace.CurrentCamera.CFrame
-        end)
-    else
-        if flightConnection then
-            flightConnection:Disconnect()
-            flightConnection = nil
-        end
-        destroyFlight()
-    end
-    playClickSound(flyToggle, "rbxassetid://9118823109")
-end)
-
--- Invisibilidade Toggle
-local invisToggle = Instance.new("TextButton")
-invisToggle.Text = "Invisibilidade ON/OFF"
-invisToggle.Size = UDim2.new(0, 200, 0, 30)
-invisToggle.Position = UDim2.new(0, 10, 0, 90)
-invisToggle.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-invisToggle.TextColor3 = Color3.new(1, 1, 1)
-invisToggle.Font = Enum.Font.GothamBold
-invisToggle.TextSize = 14
-invisToggle.Parent = HomeTab
-
-local invisEnabled = false
-local invisPartsCache = {}
-
-local function saveOriginalState(instance)
-    if invisPartsCache[instance] then return end
-    invisPartsCache[instance] = {
-        Transparency = instance.Transparency,
-        CanCollide = instance:IsA("BasePart") and instance.CanCollide or nil
-    }
-end
-
-local function setTransparencyRecursive(instance, transparency)
-    if instance:IsA("BasePart") then
-        if invisEnabled then
-            saveOriginalState(instance)
-            instance.Transparency = transparency
-            instance.CanCollide = false
-        else
-            local original = invisPartsCache[instance]
-            if original then
-                instance.Transparency = original.Transparency
-                if original.CanCollide ~= nil then
-                    instance.CanCollide = original.CanCollide
-                end
-            else
-                instance.Transparency = 0
-                if instance:IsA("BasePart") then
-                    instance.CanCollide = true
-                end
-            end
-        end
-    elseif instance:IsA("Decal") or instance:IsA("Texture") or instance:IsA("SpecialMesh") then
-        instance.Transparency = transparency
-    end
-
-    for _, child in ipairs(instance:GetChildren()) do
-        setTransparencyRecursive(child, transparency)
-    end
-end
-
-invisToggle.MouseButton1Click:Connect(function()
-    invisEnabled = not invisEnabled
-
-    local soundId = invisEnabled and "rbxassetid://9118823109" or "rbxassetid://9118823111"
-    playClickSound(invisToggle, soundId)
-
-    local character = player.Character
-    if character then
-        if invisEnabled then
-            invisPartsCache = {}
-            setTransparencyRecursive(character, 1)
-        else
-            setTransparencyRecursive(character, 0)
-            invisPartsCache = {}
-        end
-    end
-end)
-
--- ===== Conteúdo Aba Outfit =====
--- Exemplo de botão para colocar roupa especial
-local outfitBtn = Instance.new("TextButton")
-outfitBtn.Text = "Aplicar Roupa Sombria"
-outfitBtn.Size = UDim2.new(0, 200, 0, 30)
-outfitBtn.Position = UDim2.new(0, 10, 0, 10)
-outfitBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-outfitBtn.TextColor3 = Color3.new(1, 1, 1)
-outfitBtn.Font = Enum.Font.GothamBold
-outfitBtn.TextSize = 14
-outfitBtn.Parent = OutfitTab
-
-outfitBtn.MouseButton1Click:Connect(function()
-    playClickSound(outfitBtn, "rbxassetid://9118823109")
-    -- Aqui você adicionaria o código para equipar a roupa
-    print("Roupa sombria aplicada!")
-end)
-
--- ===== Conteúdo Aba Risk =====
-local riskBtn = Instance.new("TextButton")
-riskBtn.Text = "Gerar Dinheiro Macabro"
-riskBtn.Size = UDim2.new(0, 200, 0, 30)
-riskBtn.Position = UDim2.new(0, 10, 0, 10)
-riskBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-riskBtn.TextColor3 = Color3.new(1, 1, 1)
-riskBtn.Font = Enum.Font.GothamBold
-riskBtn.TextSize = 14
-riskBtn.Parent = RiskTab
-
-riskBtn.MouseButton1Click:Connect(function()
-    playClickSound(riskBtn, "rbxassetid://9118823109")
-    -- Código para gerar dinheiro ou função especial
-    print("Dinheiro macabro gerado!")
-end)
-
--- === RISK TAB ===
-local moneyBox = Instance.new("TextBox", RiskTab)
-moneyBox.PlaceholderText = "Quantidade de dinheiro"
-moneyBox.Size = UDim2.new(0, 200, 0, 30)
-moneyBox.Position = UDim2.new(0, 110, 0, 90)
-moneyBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-moneyBox.TextColor3 = Color3.new(1, 1, 1)
-moneyBox.Font = Enum.Font.Gotham
-
-local moneyBtn = Instance.new("TextButton", RiskTab)
-moneyBtn.Text = "💸 Adicionar Dinheiro"
-moneyBtn.Size = UDim2.new(0, 200, 0, 30)
-moneyBtn.Position = UDim2.new(0, 110, 0, 130)
-moneyBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-moneyBtn.TextColor3 = Color3.new(1, 1, 1)
-moneyBtn.Font = Enum.Font.GothamBold
-moneyBtn.TextSize = 14
-
-moneyBtn.MouseButton1Click:Connect(function()
-    local amount = tonumber(moneyBox.Text)
-    if amount and amount > 0 then
-        -- Exemplo: adicionar dinheiro - aqui você conecta ao sistema do jogo
-        print("Adicionando dinheiro: " .. amount)
-        -- Som ao adicionar dinheiro
-        local sound = Instance.new("Sound", moneyBtn)
-        sound.SoundId = "rbxassetid://9118823109"
-        sound.Volume = 0.7
-        sound:Play()
-        game.Debris:AddItem(sound, 2)
-    else
-        warn("Valor inválido para dinheiro")
-    end
-end)
 
 -- === FINALIZAÇÃO ===
 -- Definir aba inicial visível
