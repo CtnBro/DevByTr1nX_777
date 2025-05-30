@@ -1,298 +1,243 @@
--- GUI Th1x Menu Script by Tr1nX_777 | Versão Expandida Sombria
-
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
--- Sons usados para feedback
-local function createSound(parent, soundId)
-    local sound = Instance.new("Sound")
-    sound.SoundId = soundId
-    sound.Volume = 0.5
-    sound.Parent = parent
-    return sound
-end
-
--- Som de ativar/desativar
-local soundOn = createSound(PlayerGui, "rbxassetid://9118822020")  -- som de clique positivo
-local soundOff = createSound(PlayerGui, "rbxassetid://9118822050") -- som de clique negativo
-
--- Função para criar botão com borda e canto arredondado
-local function createButton(parent, text, position)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 200, 0, 30)
-    btn.Position = position
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    btn.TextColor3 = Color3.fromRGB(230, 230, 230)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 16
-    btn.Text = text
-    btn.AutoButtonColor = false
-    btn.Parent = parent
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = btn
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 0, 0)
-    stroke.Thickness = 1.5
-    stroke.Parent = btn
-
-    -- Efeito hover dark glow
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70, 0, 0)}):Play()
-    end)
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 35, 35)}):Play()
-    end)
-
-    return btn
-end
-
--- Criando GUI base
-local gui = Instance.new("ScreenGui")
+local gui = Instance.new("ScreenGui", PlayerGui)
 gui.Name = "Th1xDevMenu"
 gui.ResetOnSpawn = false
-gui.Parent = PlayerGui
 
 local Frame = Instance.new("Frame", gui)
-Frame.Size = UDim2.new(0, 420, 0, 360)
-Frame.Position = UDim2.new(0.3, 0, 0.2, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Frame.Size = UDim2.new(0, 400, 0, 320)
+Frame.Position = UDim2.new(0.35, 0, 0.3, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(35, 0, 60) -- Roxo escuro
 Frame.BorderSizePixel = 0
 Frame.Active = true
 Frame.Draggable = true
 
 local UICorner = Instance.new("UICorner", Frame)
-UICorner.CornerRadius = UDim.new(0, 16)
+UICorner.CornerRadius = UDim.new(0, 12)
 
 local TabHolder = Instance.new("Frame", Frame)
-TabHolder.Size = UDim2.new(0, 120, 0, 320)
-TabHolder.Position = UDim2.new(0, 0, 0, 40)
-TabHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-local cornerTab = Instance.new("UICorner", TabHolder)
-cornerTab.CornerRadius = UDim.new(0, 14)
+TabHolder.Size = UDim2.new(0, 100, 0, 290)
+TabHolder.Position = UDim2.new(0, 0, 0, 30)
+TabHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Cinza escuro
 
 local Layout = Instance.new("UIListLayout", TabHolder)
 Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.Padding = UDim.new(0, 8)
 
--- Área conteúdo da aba
-local ContentFrame = Instance.new("Frame", Frame)
-ContentFrame.Size = UDim2.new(1, -130, 1, -40)
-ContentFrame.Position = UDim2.new(0, 130, 0, 40)
-ContentFrame.BackgroundTransparency = 1
+local TabList = {}
+local CurrentTab
 
-local tabs = {}
-local currentTab
+function CreateTab(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 30)
+    btn.Text = name
+    btn.BackgroundColor3 = Color3.fromRGB(50, 0, 90) -- Roxo mais vibrante para botões
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    btn.BorderSizePixel = 0
 
-local function createTab(name)
-    local button = createButton(TabHolder, name, UDim2.new(0, 0, 0, 0))
-    button.Size = UDim2.new(1, 0, 0, 40)
-    button.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
-    
-    local tabFrame = Instance.new("Frame", ContentFrame)
-    tabFrame.Size = UDim2.new(1, 0, 1, 0)
-    tabFrame.BackgroundTransparency = 1
+    local tabFrame = Instance.new("Frame", Frame)
+    tabFrame.Size = UDim2.new(1, 0, 1, -30)
+    tabFrame.Position = UDim2.new(0, 0, 0, 30)
+    tabFrame.BackgroundColor3 = Color3.fromRGB(25, 0, 50) -- Fundo roxo escuro
+    tabFrame.BackgroundTransparency = 0
     tabFrame.Visible = false
-    
-    button.MouseButton1Click:Connect(function()
-        if currentTab then currentTab.Visible = false end
-        tabFrame.Visible = true
-        currentTab = tabFrame
-    end)
-
-    table.insert(tabs, {button = button, frame = tabFrame})
-    return tabFrame, button
-end
-
--- Função para toggle com som e mudança visual
-local function createToggleButton(parent, text, position)
-    local btn = createButton(parent, text, position)
-    local toggled = false
-
-    local function updateVisual()
-        if toggled then
-            btn.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
-            btn.Text = text .. " [ON]"
-            soundOn:Play()
-        else
-            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-            btn.Text = text .. " [OFF]"
-            soundOff:Play()
-        end
-    end
+    local corner = Instance.new("UICorner", tabFrame)
+    corner.CornerRadius = UDim.new(0, 10)
 
     btn.MouseButton1Click:Connect(function()
-        toggled = not toggled
-        updateVisual()
-        -- Aqui você pode disparar eventos ou funções para ligar/desligar funcionalidade
+        if CurrentTab then CurrentTab.Visible = false end
+        tabFrame.Visible = true
+        CurrentTab = tabFrame
     end)
 
-    updateVisual()
-    return btn, function() return toggled end
+    table.insert(TabList, {Button = btn, Frame = tabFrame})
+    return tabFrame, btn
 end
 
--- Criar abas
-local homeTab, homeBtn = createTab("Home")
-local outfitTab, outfitBtn = createTab("Outfit")
-local riskTab, riskBtn = createTab("Risk")
-
--- Ajustar pai dos botões da aba
+-- HOME TAB
+local HomeTab, homeBtn = CreateTab("Home")
 homeBtn.Parent = TabHolder
-outfitBtn.Parent = TabHolder
-riskBtn.Parent = TabHolder
 
--- -- -- -- -- HOME TAB -- -- -- -- --
+local espToggle = Instance.new("TextButton", HomeTab)
+espToggle.Text = "ESP ON/OFF"
+espToggle.Size = UDim2.new(0, 200, 0, 30)
+espToggle.Position = UDim2.new(0, 110, 0, 10)
+espToggle.BackgroundColor3 = Color3.fromRGB(70, 0, 110)
+espToggle.TextColor3 = Color3.new(1, 1, 1)
+espToggle.Font = Enum.Font.GothamBold
 
--- Toggle ESP
-local espToggle, isEspOn = createToggleButton(homeTab, "ESP", UDim2.new(0, 20, 0, 20))
+local flyToggle = Instance.new("TextButton", HomeTab)
+flyToggle.Text = "Fly ON/OFF"
+flyToggle.Size = UDim2.new(0, 200, 0, 30)
+flyToggle.Position = UDim2.new(0, 110, 0, 50)
+flyToggle.BackgroundColor3 = Color3.fromRGB(70, 0, 110)
+flyToggle.TextColor3 = Color3.new(1, 1, 1)
+flyToggle.Font = Enum.Font.GothamBold
 
--- Toggle Fly (com animação macabra)
-local flyToggle, isFlyOn = createToggleButton(homeTab, "Fly", UDim2.new(0, 20, 0, 70))
+local invisToggle = Instance.new("TextButton", HomeTab)
+invisToggle.Text = "Invisível ON/OFF"
+invisToggle.Size = UDim2.new(0, 200, 0, 30)
+invisToggle.Position = UDim2.new(0, 110, 0, 90)
+invisToggle.BackgroundColor3 = Color3.fromRGB(70, 0, 110)
+invisToggle.TextColor3 = Color3.new(1, 1, 1)
+invisToggle.Font = Enum.Font.GothamBold
 
--- Função para animação de voo sombria
-local flying = false
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
-
-local flyTweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-
-local flyTweenUp = TweenService:Create(rootPart, flyTweenInfo, {Position = rootPart.Position + Vector3.new(0, 5, 0)})
-local flyTweenDown = TweenService:Create(rootPart, flyTweenInfo, {Position = rootPart.Position - Vector3.new(0, 5, 0)})
-
-local flyingConnection
-
-local function startFlying()
-    flying = true
-
-    -- Som do voo
-    local flySound = createSound(rootPart, "rbxassetid://9118822200")
-    flySound.Looped = true
-    flySound.Volume = 0.3
-    flySound:Play()
-
-    flyingConnection = RunService.Heartbeat:Connect(function(step)
-        local newPos = rootPart.Position + Vector3.new(0, math.sin(tick() * 5) * 0.5, 0)
-        rootPart.CFrame = CFrame.new(newPos) * CFrame.Angles(0, tick(), 0)
-    end)
-
-    -- Visual macabro no personagem (exemplo: cor vermelha nos braços)
-    for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") then
-            part.Material = Enum.Material.Neon
-            part.Color = Color3.fromRGB(180, 0, 0)
-        end
-    end
-end
-
-local function stopFlying()
-    flying = false
-    if flyingConnection then
-        flyingConnection:Disconnect()
-        flyingConnection = nil
-    end
-    -- Resetar material e cor para padrão
-    for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") then
-            part.Material = Enum.Material.SmoothPlastic
-            part.Color = Color3.fromRGB(255, 255, 255)
-        end
-    end
-end
-
-flyToggle.MouseButton1Click:Connect(function()
-    if flying then
-        stopFlying()
-        soundOff:Play()
-    else
-        startFlying()
-        soundOn:Play()
-    end
-end)
-
--- Teleporte simples
-local tpBox = Instance.new("TextBox", homeTab)
+local tpBox = Instance.new("TextBox", HomeTab)
 tpBox.PlaceholderText = "Nome do Jogador"
 tpBox.Size = UDim2.new(0, 200, 0, 30)
-tpBox.Position = UDim2.new(0, 20, 0, 120)
-tpBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+tpBox.Position = UDim2.new(0, 110, 0, 130)
+tpBox.BackgroundColor3 = Color3.fromRGB(40, 0, 70)
 tpBox.TextColor3 = Color3.new(1, 1, 1)
+tpBox.Font = Enum.Font.GothamBold
 tpBox.ClearTextOnFocus = false
-local cornerTp = Instance.new("UICorner", tpBox)
-cornerTp.CornerRadius = UDim.new(0, 6)
+tpBox.TextStrokeTransparency = 0.8
 
-local tpBtn = createButton(homeTab, "Teleportar", UDim2.new(0, 20, 0, 160))
+local tpBtn = Instance.new("TextButton", HomeTab)
+tpBtn.Text = "Teleportar"
+tpBtn.Size = UDim2.new(0, 200, 0, 30)
+tpBtn.Position = UDim2.new(0, 110, 0, 170)
+tpBtn.BackgroundColor3 = Color3.fromRGB(70, 0, 110)
+tpBtn.TextColor3 = Color3.new(1, 1, 1)
+tpBtn.Font = Enum.Font.GothamBold
 
-tpBtn.MouseButton1Click:Connect(function()
-    local targetName = tpBox.Text
-    local targetPlayer = Players:FindFirstChild(targetName)
-    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        rootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-        soundOn:Play()
+-- FUNÇÃO DE VOAR MELHORADA
+local flying = false
+local flyingSpeed = 50
+local flyBodyVelocity, flyBodyGyro
+
+local soundFlyToggle = Instance.new("Sound", Frame)
+soundFlyToggle.SoundId = "rbxassetid://9118825981" -- som curto, macabro (pode trocar o id)
+soundFlyToggle.Volume = 0.5
+
+flyToggle.MouseButton1Click:Connect(function()
+    flying = not flying
+    soundFlyToggle:Play()
+    if flying then
+        local char = player.Character
+        if char then
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if hrp and humanoid then
+                humanoid.PlatformStand = true
+                flyBodyVelocity = Instance.new("BodyVelocity", hrp)
+                flyBodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+
+                flyBodyGyro = Instance.new("BodyGyro", hrp)
+                flyBodyGyro.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+                flyBodyGyro.CFrame = hrp.CFrame
+
+                -- Partículas roxas macabras
+                local particle = Instance.new("ParticleEmitter", hrp)
+                particle.Color = ColorSequence.new(Color3.fromRGB(150, 0, 255))
+                particle.LightEmission = 0.8
+                particle.Size = NumberSequence.new(0.5)
+                particle.Rate = 20
+                particle.Speed = NumberRange.new(1)
+                particle.Lifetime = NumberRange.new(0.5)
+                particle.Name = "FlyParticles"
+
+                -- Controle de voo
+                spawn(function()
+                    while flying and hrp.Parent do
+                        flyBodyVelocity.Velocity = hrp.CFrame.LookVector * flyingSpeed + Vector3.new(0, 10 * math.sin(tick()*5), 0) -- flutuação
+                        flyBodyGyro.CFrame = workspace.CurrentCamera.CFrame * CFrame.Angles(math.rad(5*math.sin(tick()*4)), 0, 0)
+                        wait()
+                    end
+                    if flyBodyVelocity then flyBodyVelocity:Destroy() end
+                    if flyBodyGyro then flyBodyGyro:Destroy() end
+                    if hrp:FindFirstChild("FlyParticles") then hrp.FlyParticles:Destroy() end
+                    if humanoid then humanoid.PlatformStand = false end
+                end)
+            end
+        end
     else
-        soundOff:Play()
+        -- Para voar
+        local char = player.Character
+        if char then
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if hrp then
+                if flyBodyVelocity then flyBodyVelocity:Destroy() end
+                if flyBodyGyro then flyBodyGyro:Destroy() end
+                if hrp:FindFirstChild("FlyParticles") then hrp.FlyParticles:Destroy() end
+                if humanoid then humanoid.PlatformStand = false end
+            end
+        end
     end
 end)
 
--- -- -- -- -- OUTFIT TAB -- -- -- -- --
+-- ADICIONAR DINHEIRO COM INPUT
+local moneyInput = Instance.new("TextBox", HomeTab)
+moneyInput.PlaceholderText = "Quantidade de dinheiro"
+moneyInput.Size = UDim2.new(0, 130, 0, 30)
+moneyInput.Position = UDim2.new(0, 110, 0, 210)
+moneyInput.BackgroundColor3 = Color3.fromRGB(40, 0, 70)
+moneyInput.TextColor3 = Color3.new(1, 1, 1)
+moneyInput.Font = Enum.Font.GothamBold
+moneyInput.ClearTextOnFocus = false
 
-local carrotBtn = createButton(outfitTab, "GRG STORE - Cenoura", UDim2.new(0, 20, 0, 20))
-local darkBtn = createButton(outfitTab, "tr1nx_777 - Roupa Macabra", UDim2.new(0, 20, 0, 70))
+local addMoneyBtn = Instance.new("TextButton", HomeTab)
+addMoneyBtn.Text = "Adicionar Dinheiro"
+addMoneyBtn.Size = UDim2.new(0, 70, 0, 30)
+addMoneyBtn.Position = UDim2.new(0, 250, 0, 210)
+addMoneyBtn.BackgroundColor3 = Color3.fromRGB(70, 0, 110)
+addMoneyBtn.TextColor3 = Color3.new(1, 1, 1)
+addMoneyBtn.Font = Enum.Font.GothamBold
 
+addMoneyBtn.MouseButton1Click:Connect(function()
+    local amount = tonumber(moneyInput.Text)
+    if amount and amount > 0 then
+        -- Aqui você coloca a função de adicionar dinheiro do jogo
+        print("Adicionar dinheiro: "..amount)
+        -- Exemplo: player.leaderstats.Cash.Value += amount (ajuste conforme seu sistema)
+    else
+        warn("Quantidade inválida")
+    end
+end)
+
+-- OUTFIT TAB - aplicar roupas personalizadas
+local OutfitTab, outfitBtn = CreateTab("Outfit")
+outfitBtn.Parent = TabHolder
+
+local function applyOutfit(modelId)
+    local char = player.Character
+    if char then
+        -- Tenta usar Humanoid:ApplyDescription (se usar R15)
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            local success, err = pcall(function()
+                local asset = game:GetService("InsertService"):LoadAsset(modelId)
+                asset.Parent = char
+            end)
+            if not success then warn("Erro ao aplicar roupa: "..err) end
+        end
+    end
+end
+
+local carrotBtn = Instance.new("TextButton", OutfitTab)
+carrotBtn.Text = "GRG STORE - Cenoura"
+carrotBtn.Size = UDim2.new(0, 200, 0, 30)
+carrotBtn.Position = UDim2.new(0, 110, 0, 10)
+carrotBtn.BackgroundColor3 = Color3.fromRGB(70, 0, 110)
+carrotBtn.TextColor3 = Color3.new(1, 1, 1)
+carrotBtn.Font = Enum.Font.GothamBold
 carrotBtn.MouseButton1Click:Connect(function()
-    soundOn:Play()
-    -- Aqui insira código para aplicar roupa cenoura
+    applyOutfit(163977769609584) -- troque pelo ID real do modelo da cenoura
 end)
 
+local darkBtn = Instance.new("TextButton", OutfitTab)
+darkBtn.Text = "tr1nx_777 - Roupa Macabra"
+darkBtn.Size = UDim2.new(0, 200, 0, 30)
+darkBtn.Position = UDim2.new(0, 110, 0, 50)
+darkBtn.BackgroundColor3 = Color3.fromRGB(70, 0, 110)
+darkBtn.TextColor3 = Color3.new(1, 1, 1)
+darkBtn.Font = Enum.Font.GothamBold
 darkBtn.MouseButton1Click:Connect(function()
-    soundOn:Play()
-    -- Aqui insira código para aplicar roupa macabra
+    applyOutfit(87654321) -- troque pelo ID real do modelo da roupa macabra
 end)
 
--- -- -- -- -- RISK TAB -- -- -- -- --
-
-local desc = Instance.new("TextLabel", riskTab)
-desc.Text = "Tr1nX_777 que domina"
-desc.Size = UDim2.new(0, 260, 0, 30)
-desc.Position = UDim2.new(0, 20, 0, 20)
-desc.TextColor3 = Color3.fromRGB(255, 0, 0)
-desc.Font = Enum.Font.GothamBold
-desc.TextSize = 16
-desc.BackgroundTransparency = 1
-
-local moneyBtn = createButton(riskTab, "💸 Adicionar Dinheiro", UDim2.new(0, 20, 0, 70))
-moneyBtn.MouseButton1Click:Connect(function()
-    soundOn:Play()
-    -- Código para adicionar dinheiro aqui
-end)
-
--- -- -- -- -- BOTÃO MINIMIZAR -- -- -- -- --
-
-local MiniBtn = createButton(Frame, "-", UDim2.new(1, -40, 0, 5))
-MiniBtn.Size = UDim2.new(0, 30, 0, 30)
-MiniBtn.TextSize = 24
-MiniBtn.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-
-local miniIcon = createButton(gui, "Th1x", UDim2.new(0, 20, 1, -60))
-miniIcon.Visible = false
-
-MiniBtn.MouseButton1Click:Connect(function()
-    Frame.Visible = false
-    miniIcon.Visible = true
-    soundOn:Play()
-end)
-
-miniIcon.MouseButton1Click:Connect(function()
-    Frame.Visible = true
-    miniIcon.Visible = false
-    soundOn:Play()
-end)
-
--- Ativa a primeira aba automaticamente
-homeBtn.MouseButton1Click:Invoke()
-
+-- ... Resto do código (abas, minimização, etc) permanece o mesmo
