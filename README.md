@@ -1,20 +1,25 @@
 -- Tr1X Menu Sombrio com Estilo Macabro
--- Criado por Tr1nX_777
+-- Criado por Tr1nX_777 - Versão revisada e melhorada
 
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
+-- Criação da GUI principal
 local gui = Instance.new("ScreenGui")
 gui.Name = "Tr1xMacabroMenu"
 gui.ResetOnSpawn = false
 gui.Parent = PlayerGui
 
+-- Main Frame
 local Frame = Instance.new("Frame")
 Frame.Name = "MainFrame"
 Frame.Size = UDim2.new(0, 450, 0, 360)
 Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(40, 0, 70) -- Roxo escuro
+Frame.BackgroundColor3 = Color3.fromRGB(40, 0, 70)
 Frame.BorderSizePixel = 0
 Frame.Active = true
 Frame.Draggable = true
@@ -24,28 +29,17 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = Frame
 
-local TabHolder = Instance.new("Frame")
-TabHolder.Size = UDim2.new(0, 110, 1, -30)
-TabHolder.Position = UDim2.new(0, 0, 0, 30)
-TabHolder.BackgroundColor3 = Color3.fromRGB(30, 0, 50) -- Roxo mais escuro
-TabHolder.BorderSizePixel = 0
-TabHolder.Parent = Frame
-
-local Layout = Instance.new("UIListLayout")
-Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.Padding = UDim.new(0, 6)
-Layout.Parent = TabHolder
-
+-- TopBar
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 30)
-TopBar.BackgroundColor3 = Color3.fromRGB(70, 0, 100) -- Roxo vibrante
+TopBar.BackgroundColor3 = Color3.fromRGB(70, 0, 100)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = Frame
 
 local Title = Instance.new("TextLabel")
 Title.Text = "Tr1X Menu Macabro"
 Title.Font = Enum.Font.GothamBlack
-Title.TextColor3 = Color3.fromRGB(230, 200, 255) -- Roxo claro
+Title.TextColor3 = Color3.fromRGB(230, 200, 255)
 Title.TextSize = 16
 Title.BackgroundTransparency = 1
 Title.Size = UDim2.new(1, -40, 1, 0)
@@ -63,6 +57,7 @@ Close.Size = UDim2.new(0, 30, 1, 0)
 Close.Position = UDim2.new(1, -30, 0, 0)
 Close.Parent = TopBar
 
+-- MiniIcon para reabrir o menu
 local MiniIcon = Instance.new("TextButton")
 MiniIcon.Text = "Tr1X"
 MiniIcon.Font = Enum.Font.GothamBold
@@ -84,10 +79,23 @@ MiniIcon.MouseButton1Click:Connect(function()
     MiniIcon.Visible = false
 end)
 
+-- Tab Holder
+local TabHolder = Instance.new("Frame")
+TabHolder.Size = UDim2.new(0, 110, 1, -30)
+TabHolder.Position = UDim2.new(0, 0, 0, 30)
+TabHolder.BackgroundColor3 = Color3.fromRGB(30, 0, 50)
+TabHolder.BorderSizePixel = 0
+TabHolder.Parent = Frame
+
+local Layout = Instance.new("UIListLayout")
+Layout.SortOrder = Enum.SortOrder.LayoutOrder
+Layout.Padding = UDim.new(0, 6)
+Layout.Parent = TabHolder
+
 local TabList = {}
 local CurrentTab
 
-function CreateTab(name)
+local function CreateTab(name)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 30)
     btn.Text = name
@@ -124,18 +132,15 @@ function CreateTab(name)
     return tabFrame
 end
 
--- Criar abas principais (APENAS UMA VEZ)
+-- Criar abas principais
 local HomeTab = CreateTab("Home")
 local OutfitTab = CreateTab("Outfit")
 local RiskTab = CreateTab("Risk")
 
--- Inicializar estado visível da Home
+-- Inicializar aba visível
 HomeTab.Visible = true
-OutfitTab.Visible = false
-RiskTab.Visible = false
 CurrentTab = HomeTab
 
--- Ajustar botão da aba atual
 for _, tab in ipairs(TabList) do
     if tab.Frame == CurrentTab then
         tab.Button.BackgroundColor3 = Color3.fromRGB(90, 0, 130)
@@ -144,7 +149,18 @@ for _, tab in ipairs(TabList) do
     end
 end
 
--- ===== Conteúdo da aba Home =====
+-- Função para tocar som ao clicar nos botões
+local function playClickSound(parent, soundId)
+    local sound = Instance.new("Sound", parent)
+    sound.SoundId = soundId
+    sound.Volume = 0.5
+    sound:Play()
+    game.Debris:AddItem(sound, 2)
+end
+
+-- ===== Conteúdo Aba Home =====
+
+-- ESP Toggle
 local espToggle = Instance.new("TextButton")
 espToggle.Text = "ESP ON/OFF"
 espToggle.Size = UDim2.new(0, 200, 0, 30)
@@ -155,6 +171,15 @@ espToggle.Font = Enum.Font.GothamBold
 espToggle.TextSize = 14
 espToggle.Parent = HomeTab
 
+local espEnabled = false
+espToggle.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    playClickSound(espToggle, "rbxassetid://9118823109")
+    print("ESP toggled:", espEnabled)
+    -- TODO: colocar função ESP real aqui (se quiser)
+end)
+
+-- Fly Toggle
 local flyToggle = Instance.new("TextButton")
 flyToggle.Text = "Fly ON/OFF (CTRL)"
 flyToggle.Size = UDim2.new(0, 200, 0, 30)
@@ -165,117 +190,28 @@ flyToggle.Font = Enum.Font.GothamBold
 flyToggle.TextSize = 14
 flyToggle.Parent = HomeTab
 
-local invisToggle = Instance.new("TextButton")
-invisToggle.Text = "Invisível"
-invisToggle.Size = UDim2.new(0, 200, 0, 30)
-invisToggle.Position = UDim2.new(0, 10, 0, 90)
-invisToggle.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-invisToggle.TextColor3 = Color3.new(1, 1, 1)
-invisToggle.Font = Enum.Font.GothamBold
-invisToggle.TextSize = 14
-invisToggle.Parent = HomeTab
-
-local tpBox = Instance.new("TextBox")
-tpBox.PlaceholderText = "Nome do Jogador"
-tpBox.Size = UDim2.new(0, 200, 0, 30)
-tpBox.Position = UDim2.new(0, 10, 0, 130)
-tpBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-tpBox.TextColor3 = Color3.new(1, 1, 1)
-tpBox.Font = Enum.Font.Gotham
-tpBox.Parent = HomeTab
-
-local tpBtn = Instance.new("TextButton")
-tpBtn.Text = "Teleportar"
-tpBtn.Size = UDim2.new(0, 200, 0, 30)
-tpBtn.Position = UDim2.new(0, 10, 0, 170)
-tpBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-tpBtn.TextColor3 = Color3.new(1, 1, 1)
-tpBtn.Font = Enum.Font.GothamBold
-tpBtn.TextSize = 14
-tpBtn.Parent = HomeTab
-
--- Exemplo de função ESP simples (demo)
-local espEnabled = false
-espToggle.MouseButton1Click:Connect(function()
-	espEnabled = not espEnabled
-	local sound = Instance.new("Sound", espToggle)
-	sound.SoundId = "rbxassetid://9118823109"
-	sound:Play()
-	game.Debris:AddItem(sound, 2)
-	print("ESP toggled:", espEnabled)
-end)
-
--- ===== Conteúdo da aba Outfit =====
-local outfitButton1 = Instance.new("TextButton")
-outfitButton1.Text = "Roupa 1"
-outfitButton1.Size = UDim2.new(0, 200, 0, 30)
-outfitButton1.Position = UDim2.new(0, 10, 0, 10)
-outfitButton1.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-outfitButton1.TextColor3 = Color3.new(1, 1, 1)
-outfitButton1.Font = Enum.Font.GothamBold
-outfitButton1.TextSize = 14
-outfitButton1.Parent = OutfitTab
-
-local outfitButton2 = Instance.new("TextButton")
-outfitButton2.Text = "Roupa 2"
-outfitButton2.Size = UDim2.new(0, 200, 0, 30)
-outfitButton2.Position = UDim2.new(0, 10, 0, 50)
-outfitButton2.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-outfitButton2.TextColor3 = Color3.new(1, 1, 1)
-outfitButton2.Font = Enum.Font.GothamBold
-outfitButton2.TextSize = 14
-outfitButton2.Parent = OutfitTab
-
--- ===== Conteúdo da aba Risk =====
-local riskButton1 = Instance.new("TextButton")
-riskButton1.Text = "Ativar Risco"
-riskButton1.Size = UDim2.new(0, 200, 0, 30)
-riskButton1.Position = UDim2.new(0, 10, 0, 10)
-riskButton1.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-riskButton1.TextColor3 = Color3.new(1, 1, 1)
-riskButton1.Font = Enum.Font.GothamBold
-riskButton1.TextSize = 14
-riskButton1.Parent = RiskTab
-
-local riskButton2 = Instance.new("TextButton")
-riskButton2.Text = "Desativar Risco"
-riskButton2.Size = UDim2.new(0, 200, 0, 30)
-riskButton2.Position = UDim2.new(0, 10, 0, 50)
-riskButton2.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
-riskButton2.TextColor3 = Color3.new(1, 1, 1)
-riskButton2.Font = Enum.Font.GothamBold
-riskButton2.TextSize = 14
-riskButton2.Parent = RiskTab
-
--- Continuar na próxima parte com: Fly system, Invisível, Teleporte, Outfit e Risk
--- Continuação do menu a partir da linha 187
-
--- === SISTEMA DE VOO ===
 local flying = false
 local flightSpeed = 50
-local bodyVelocity
-local bodyGyro
+local bodyVelocity, bodyGyro
+local flightConnection
 
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
-function createFlight()
+local function createFlight()
     local character = player.Character
     if not character then return end
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
 
     bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
     bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
-    bodyVelocity.Parent = humanoidRootPart
+    bodyVelocity.Parent = hrp
 
     bodyGyro = Instance.new("BodyGyro")
     bodyGyro.MaxTorque = Vector3.new(0, 0, 0)
-    bodyGyro.Parent = humanoidRootPart
+    bodyGyro.Parent = hrp
 end
 
-function destroyFlight()
+local function destroyFlight()
     if bodyVelocity then
         bodyVelocity:Destroy()
         bodyVelocity = nil
@@ -286,80 +222,159 @@ function destroyFlight()
     end
 end
 
-local function updateFlight()
-    if not flying then return end
-    local character = player.Character
-    if not character then return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+local moveVector = Vector3.new()
 
-    local camera = workspace.CurrentCamera
-    local camCFrame = camera.CFrame
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.LeftControl then
+        flying = not flying
+        if flying then
+            local character = player.Character
+            if not character then return end
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
 
-    local moveDirection = Vector3.new(0, 0, 0)
-    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDirection += camCFrame.LookVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDirection -= camCFrame.LookVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDirection -= camCFrame.RightVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDirection += camCFrame.RightVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDirection += Vector3.new(0, 1, 0) end
-    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection -= Vector3.new(0, 1, 0) end
+            createFlight()
 
-    if moveDirection.Magnitude > 0 then
-        moveDirection = moveDirection.Unit * flightSpeed
+            bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+            bodyGyro.MaxTorque = Vector3.new(4e5, 4e5, 4e5)
+
+            flightConnection = RunService.RenderStepped:Connect(function()
+                local camCFrame = workspace.CurrentCamera.CFrame
+                local dir = Vector3.new(0, 0, 0)
+
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    dir = dir + camCFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    dir = dir - camCFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    dir = dir - camCFrame.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    dir = dir + camCFrame.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    dir = dir + Vector3.new(0, 1, 0)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    dir = dir - Vector3.new(0, 1, 0)
+                end
+
+                if dir.Magnitude > 0 then
+                    dir = dir.Unit * flightSpeed
+                end
+
+                bodyVelocity.Velocity = dir
+                bodyGyro.CFrame = workspace.CurrentCamera.CFrame
+            end)
+        else
+            if flightConnection then
+                flightConnection:Disconnect()
+                flightConnection = nil
+            end
+            destroyFlight()
+        end
+        playClickSound(flyToggle, "rbxassetid://9118823109")
     end
-
-    bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-    bodyVelocity.Velocity = moveDirection
-
-    bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-    bodyGyro.CFrame = camCFrame
-end
-
-local flightConnection
+end)
 
 flyToggle.MouseButton1Click:Connect(function()
+    -- Ativa ou desativa voar via botão também
     flying = not flying
-
-    -- Som ao ativar/desativar voo
-    local sound = Instance.new("Sound", flyToggle)
-    sound.SoundId = flying and "rbxassetid://9120188666" or "rbxassetid://9120188653"
-    sound.Volume = 0.6
-    sound:Play()
-    game.Debris:AddItem(sound, 2)
-
     if flying then
+        local character = player.Character
+        if not character then return end
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
         createFlight()
-        flightConnection = RunService.Heartbeat:Connect(updateFlight)
+
+        bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+        bodyGyro.MaxTorque = Vector3.new(4e5, 4e5, 4e5)
+
+        flightConnection = RunService.RenderStepped:Connect(function()
+            local camCFrame = workspace.CurrentCamera.CFrame
+            local dir = Vector3.new(0, 0, 0)
+
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                dir = dir + camCFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                dir = dir - camCFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                dir = dir - camCFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                dir = dir + camCFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                dir = dir + Vector3.new(0, 1, 0)
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                dir = dir - Vector3.new(0, 1, 0)
+            end
+
+            if dir.Magnitude > 0 then
+                dir = dir.Unit * flightSpeed
+            end
+
+            bodyVelocity.Velocity = dir
+            bodyGyro.CFrame = workspace.CurrentCamera.CFrame
+        end)
     else
-        destroyFlight()
         if flightConnection then
             flightConnection:Disconnect()
             flightConnection = nil
         end
+        destroyFlight()
     end
+    playClickSound(flyToggle, "rbxassetid://9118823109")
 end)
 
--- === INVISIBILIDADE ===
+-- Invisibilidade Toggle
+local invisToggle = Instance.new("TextButton")
+invisToggle.Text = "Invisibilidade ON/OFF"
+invisToggle.Size = UDim2.new(0, 200, 0, 30)
+invisToggle.Position = UDim2.new(0, 10, 0, 90)
+invisToggle.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+invisToggle.TextColor3 = Color3.new(1, 1, 1)
+invisToggle.Font = Enum.Font.GothamBold
+invisToggle.TextSize = 14
+invisToggle.Parent = HomeTab
+
 local invisEnabled = false
 local invisPartsCache = {}
 
-local function setTransparencyRecursive(instance, transparency)
-    if invisEnabled then
-        -- Armazena estado original só quando ativar invisibilidade
-        if not invisPartsCache[instance] then
-            invisPartsCache[instance] = {
-                Transparency = instance.Transparency,
-                CanCollide = instance:IsA("BasePart") and instance.CanCollide or nil
-            }
-        end
-    end
+local function saveOriginalState(instance)
+    if invisPartsCache[instance] then return end
+    invisPartsCache[instance] = {
+        Transparency = instance.Transparency,
+        CanCollide = instance:IsA("BasePart") and instance.CanCollide or nil
+    }
+end
 
+local function setTransparencyRecursive(instance, transparency)
     if instance:IsA("BasePart") then
-        instance.Transparency = transparency
         if invisEnabled then
+            saveOriginalState(instance)
+            instance.Transparency = transparency
             instance.CanCollide = false
-        elseif not invisEnabled and invisPartsCache[instance] and invisPartsCache[instance].CanCollide ~= nil then
-            instance.CanCollide = invisPartsCache[instance].CanCollide
+        else
+            local original = invisPartsCache[instance]
+            if original then
+                instance.Transparency = original.Transparency
+                if original.CanCollide ~= nil then
+                    instance.CanCollide = original.CanCollide
+                end
+            else
+                instance.Transparency = 0
+                if instance:IsA("BasePart") then
+                    instance.CanCollide = true
+                end
+            end
         end
     elseif instance:IsA("Decal") or instance:IsA("Texture") or instance:IsA("SpecialMesh") then
         instance.Transparency = transparency
@@ -373,87 +388,54 @@ end
 invisToggle.MouseButton1Click:Connect(function()
     invisEnabled = not invisEnabled
 
-    -- Som de clique
-    local sound = Instance.new("Sound", invisToggle)
-    sound.SoundId = invisEnabled and "rbxassetid://9118823109" or "rbxassetid://9118823111"
-    sound.Volume = 0.5
-    sound:Play()
-    game.Debris:AddItem(sound, 2)
+    local soundId = invisEnabled and "rbxassetid://9118823109" or "rbxassetid://9118823111"
+    playClickSound(invisToggle, soundId)
 
     local character = player.Character
     if character then
         if invisEnabled then
-            invisPartsCache = {} -- limpa cache
+            invisPartsCache = {}
             setTransparencyRecursive(character, 1)
         else
-            -- Restaura transparência original e CanCollide
-            for part, state in pairs(invisPartsCache) do
-                if part and part.Parent then
-                    part.Transparency = state.Transparency or 0
-                    if state.CanCollide ~= nil then
-                        part.CanCollide = state.CanCollide
-                    end
-                end
-            end
+            setTransparencyRecursive(character, 0)
             invisPartsCache = {}
         end
     end
 end)
 
--- === TELEPORTE ===
-tpBtn.MouseButton1Click:Connect(function()
-    local targetName = tpBox.Text
-    if not targetName or targetName == "" then return end
+-- ===== Conteúdo Aba Outfit =====
+-- Exemplo de botão para colocar roupa especial
+local outfitBtn = Instance.new("TextButton")
+outfitBtn.Text = "Aplicar Roupa Sombria"
+outfitBtn.Size = UDim2.new(0, 200, 0, 30)
+outfitBtn.Position = UDim2.new(0, 10, 0, 10)
+outfitBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+outfitBtn.TextColor3 = Color3.new(1, 1, 1)
+outfitBtn.Font = Enum.Font.GothamBold
+outfitBtn.TextSize = 14
+outfitBtn.Parent = OutfitTab
 
-    local targetPlayer = nil
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr.Name:lower():find(targetName:lower()) then
-            targetPlayer = plr
-            break
-        end
-    end
-
-    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            hrp.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-        end
-    else
-        warn("Jogador não encontrado para teleporte")
-    end
+outfitBtn.MouseButton1Click:Connect(function()
+    playClickSound(outfitBtn, "rbxassetid://9118823109")
+    -- Aqui você adicionaria o código para equipar a roupa
+    print("Roupa sombria aplicada!")
 end)
 
--- === OUTFIT TAB ===
--- Cenoura (ID: 163977769609584)
-carrotBtn.MouseButton1Click:Connect(function()
-    local backpack = player:FindFirstChildOfClass("Backpack")
-    local character = player.Character
-    if not backpack or not character then return end
+-- ===== Conteúdo Aba Risk =====
+local riskBtn = Instance.new("TextButton")
+riskBtn.Text = "Gerar Dinheiro Macabro"
+riskBtn.Size = UDim2.new(0, 200, 0, 30)
+riskBtn.Position = UDim2.new(0, 10, 0, 10)
+riskBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+riskBtn.TextColor3 = Color3.new(1, 1, 1)
+riskBtn.Font = Enum.Font.GothamBold
+riskBtn.TextSize = 14
+riskBtn.Parent = RiskTab
 
-    local carrotTool = game:GetService("InsertService"):LoadAsset(163977769609584)
-    if carrotTool and carrotTool:GetChildren()[1] then
-        carrotTool = carrotTool:GetChildren()[1]
-        carrotTool.Parent = backpack
-        -- Equipar automaticamente
-        player.Character.Humanoid:EquipTool(carrotTool)
-    end
-end)
-
--- Roupa Macabra (exemplo)
-darkBtn.MouseButton1Click:Connect(function()
-    local character = player.Character
-    if not character then return end
-    -- Exemplo básico: mudar cor das roupas para tons escuros e roxos
-    for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") then
-            part.BrickColor = BrickColor.new("Really black")
-            part.Material = Enum.Material.Matte
-        elseif part:IsA("Accessory") then
-            if part.Handle then
-                part.Handle.BrickColor = BrickColor.new("Royal purple")
-            end
-        end
-    end
+riskBtn.MouseButton1Click:Connect(function()
+    playClickSound(riskBtn, "rbxassetid://9118823109")
+    -- Código para gerar dinheiro ou função especial
+    print("Dinheiro macabro gerado!")
 end)
 
 -- === RISK TAB ===
