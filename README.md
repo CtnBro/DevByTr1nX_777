@@ -1,22 +1,26 @@
--- Th1x Dev Menu - Versão aprimorada by ChatGPT
+-- Th1xDevMenu completo - loadstring ready
+-- Autor: Tr1nX_777 + ChatGPT
+-- Menu estilo macabro, roxo/preto/cinza escuro, som e animações clean
+-- Loadstring-friendly, tudo client-side
 
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
-local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
--- Sons simples para ativar/desativar (beep)
-local soundOn = Instance.new("Sound")
-soundOn.SoundId = "rbxassetid://9118820353" -- som beep on
-soundOn.Volume = 0.3
-soundOn.Parent = PlayerGui
+-- Sons básicos do Roblox (embed simples)
+local function createSound(parent, soundId)
+    local sound = Instance.new("Sound", parent)
+    sound.SoundId = "rbxassetid://"..soundId
+    sound.Volume = 0.3
+    sound.PlayOnRemove = false
+    return sound
+end
 
-local soundOff = Instance.new("Sound")
-soundOff.SoundId = "rbxassetid://9118820180" -- som beep off
-soundOff.Volume = 0.3
-soundOff.Parent = PlayerGui
+-- Sons para clicks ON/OFF e toggles
+local soundClickOn = createSound(PlayerGui, 12222216)   -- click sound 1
+local soundClickOff = createSound(PlayerGui, 12222190)  -- click sound 2
 
 -- Criar GUI principal
 local gui = Instance.new("ScreenGui")
@@ -24,707 +28,474 @@ gui.Name = "Th1xDevMenu"
 gui.ResetOnSpawn = false
 gui.Parent = PlayerGui
 
--- Frame principal
+-- Fundo principal
 local Frame = Instance.new("Frame", gui)
-Frame.Size = UDim2.new(0, 420, 0, 350)
+Frame.Size = UDim2.new(0, 420, 0, 360)
 Frame.Position = UDim2.new(0.3, 0, 0.25, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(45, 0, 75) -- roxo escuro
+Frame.BackgroundColor3 = Color3.fromRGB(30, 0, 60)
 Frame.BorderSizePixel = 0
 Frame.Active = true
 Frame.Draggable = true
-Frame.Name = "MainFrame"
 
 local UICorner = Instance.new("UICorner", Frame)
-UICorner.CornerRadius = UDim.new(0, 16)
+UICorner.CornerRadius = UDim.new(0, 15)
 
--- Cabeçalho
-local Header = Instance.new("TextLabel", Frame)
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundColor3 = Color3.fromRGB(35, 0, 60)
-Header.Text = "Th1x Dev Menu"
-Header.TextColor3 = Color3.fromRGB(220, 220, 220)
-Header.Font = Enum.Font.GothamBold
-Header.TextSize = 22
-Header.BorderSizePixel = 0
-Header.Position = UDim2.new(0, 0, 0, 0)
-local headerCorner = Instance.new("UICorner", Header)
-headerCorner.CornerRadius = UDim.new(0, 16)
-
--- Minimizar botão
-local MiniBtn = Instance.new("TextButton", Header)
-MiniBtn.Text = "–"
-MiniBtn.Size = UDim2.new(0, 40, 0, 40)
-MiniBtn.Position = UDim2.new(1, -40, 0, 0)
-MiniBtn.BackgroundColor3 = Color3.fromRGB(25, 0, 50)
-MiniBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-MiniBtn.Font = Enum.Font.GothamBold
-MiniBtn.TextSize = 24
-MiniBtn.BorderSizePixel = 0
-MiniBtn.Name = "MinimizeBtn"
-local miniBtnCorner = Instance.new("UICorner", MiniBtn)
-miniBtnCorner.CornerRadius = UDim.new(0, 16)
-
--- Botão para restaurar após minimizar
-local RestoreBtn = Instance.new("TextButton", gui)
-RestoreBtn.Text = "Th1x"
-RestoreBtn.Size = UDim2.new(0, 100, 0, 40)
-RestoreBtn.Position = UDim2.new(0, 20, 1, -60)
-RestoreBtn.BackgroundColor3 = Color3.fromRGB(50, 0, 80)
-RestoreBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
-RestoreBtn.Font = Enum.Font.GothamBold
-RestoreBtn.TextSize = 22
-RestoreBtn.Visible = false
-RestoreBtn.BorderSizePixel = 0
-local restoreCorner = Instance.new("UICorner", RestoreBtn)
-restoreCorner.CornerRadius = UDim.new(0, 16)
-
-MiniBtn.MouseButton1Click:Connect(function()
-    Frame.Visible = false
-    RestoreBtn.Visible = true
-    soundOff:Play()
-end)
-
-RestoreBtn.MouseButton1Click:Connect(function()
-    Frame.Visible = true
-    RestoreBtn.Visible = false
-    soundOn:Play()
-end)
-
--- Frame lateral para botões das abas
+-- Barra lateral das abas
 local TabHolder = Instance.new("Frame", Frame)
-TabHolder.Size = UDim2.new(0, 120, 0, 300)
+TabHolder.Size = UDim2.new(0, 110, 1, -40)
 TabHolder.Position = UDim2.new(0, 0, 0, 40)
-TabHolder.BackgroundColor3 = Color3.fromRGB(35, 5, 55)
+TabHolder.BackgroundColor3 = Color3.fromRGB(15, 0, 30)
 TabHolder.BorderSizePixel = 0
-local tabHolderCorner = Instance.new("UICorner", TabHolder)
-tabHolderCorner.CornerRadius = UDim.new(0, 12)
 
-local Layout = Instance.new("UIListLayout", TabHolder)
-Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.Padding = UDim.new(0, 10)
+local TabLayout = Instance.new("UIListLayout", TabHolder)
+TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabLayout.Padding = UDim.new(0, 5)
 
--- Container das abas para trocar visibilidade
-local TabContainer = Instance.new("Frame", Frame)
-TabContainer.Size = UDim2.new(1, -120, 0, 300)
-TabContainer.Position = UDim2.new(0, 120, 0, 40)
-TabContainer.BackgroundColor3 = Color3.fromRGB(20, 15, 30)
-TabContainer.BorderSizePixel = 0
-local tabContainerCorner = Instance.new("UICorner", TabContainer)
-tabContainerCorner.CornerRadius = UDim.new(0, 12)
+-- Título do menu no topo
+local TitleLabel = Instance.new("TextLabel", Frame)
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+TitleLabel.BackgroundColor3 = Color3.fromRGB(45, 0, 90)
+TitleLabel.BorderSizePixel = 0
+TitleLabel.Text = "Th1x Dev Menu"
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 22
+TitleLabel.TextColor3 = Color3.fromRGB(200, 170, 255)
 
+local UICornerTitle = Instance.new("UICorner", TitleLabel)
+UICornerTitle.CornerRadius = UDim.new(0, 15)
+
+-- Variáveis para abas e frames
 local TabList = {}
 local CurrentTab = nil
 
--- Função para criar abas e botões laterais
-local function CreateTab(name)
+local function createTab(name)
     local btn = Instance.new("TextButton", TabHolder)
-    btn.Text = name
-    btn.Size = UDim2.new(1, 0, 0, 40)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 10, 80)
-    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+    btn.Size = UDim2.new(1, 0, 0, 30)
+    btn.BackgroundColor3 = Color3.fromRGB(60, 0, 100)
+    btn.TextColor3 = Color3.fromRGB(220, 200, 255)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 18
+    btn.TextSize = 16
+    btn.Text = name
     btn.AutoButtonColor = false
-    btn.BorderSizePixel = 0
-    btn.Name = name .. "Btn"
 
     local corner = Instance.new("UICorner", btn)
-    corner.CornerRadius = UDim.new(0, 10)
+    corner.CornerRadius = UDim.new(0, 8)
 
-    local tabFrame = Instance.new("Frame", TabContainer)
-    tabFrame.Size = UDim2.new(1, 0, 1, 0)
-    tabFrame.Position = UDim2.new(0, 0, 0, 0)
-    tabFrame.BackgroundTransparency = 1
-    tabFrame.Visible = false
-    tabFrame.Name = name .. "Tab"
-
-    btn.MouseButton1Click:Connect(function()
-        if CurrentTab then
-            CurrentTab.Visible = false
+    -- Hover effect
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(90, 0, 130)}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        if CurrentTab ~= btn then
+            TweenService:Create(btn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(60, 0, 100)}):Play()
         end
-        tabFrame.Visible = true
-        CurrentTab = tabFrame
+    end)
 
-        -- Anima botão selecionado
-        for _, v in pairs(TabHolder:GetChildren()) do
-            if v:IsA("TextButton") then
-                v.BackgroundColor3 = Color3.fromRGB(50, 10, 80)
+    local tabFrame = Instance.new("Frame", Frame)
+    tabFrame.Size = UDim2.new(1, -120, 1, -40)
+    tabFrame.Position = UDim2.new(0, 110, 0, 40)
+    tabFrame.BackgroundColor3 = Color3.fromRGB(20, 10, 40)
+    tabFrame.Visible = false
+    tabFrame.BorderSizePixel = 0
+    local tabCorner = Instance.new("UICorner", tabFrame)
+    tabCorner.CornerRadius = UDim.new(0, 12)
+
+    -- Ativa aba e desativa outras
+    btn.MouseButton1Click:Connect(function()
+        if CurrentTab and CurrentTab ~= btn then
+            -- Desativa aba antiga
+            for _, t in pairs(TabList) do
+                t.Frame.Visible = false
+                TweenService:Create(t.Button, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(60, 0, 100)}):Play()
             end
         end
-        btn.BackgroundColor3 = Color3.fromRGB(100, 30, 150)
-        soundOn:Play()
+        tabFrame.Visible = true
+        CurrentTab = btn
+        TweenService:Create(btn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(120, 20, 180)}):Play()
+        soundClickOn:Play()
     end)
 
     table.insert(TabList, {Button = btn, Frame = tabFrame})
     return tabFrame, btn
 end
 
--- Criar as abas
-local HomeTab, homeBtn = CreateTab("Home")
-local OutfitTab, outfitBtn = CreateTab("Outfit")
-local RiskTab, riskBtn = CreateTab("Risk")
+-- Criar as abas e guardar
+local HomeTab, homeBtn = createTab("Home")
+local OutfitTab, outfitBtn = createTab("Outfit")
+local RiskTab, riskBtn = createTab("Risk")
 
--- Ativar a Home por padrão
-homeBtn.BackgroundColor3 = Color3.fromRGB(100, 30, 150)
+-- Ativar HomeTab inicialmente
+homeBtn.BackgroundColor3 = Color3.fromRGB(120, 20, 180)
 HomeTab.Visible = true
-CurrentTab = HomeTab
+CurrentTab = homeBtn
 
--- === HOME TAB CONTENT ===
+-- =======================
+-- Funções gerais e helpers
+-- =======================
 
--- Função helper para criar botões estilizados
-local function CreateButton(parent, text, posY)
+-- Função para criar toggle buttons estilizados
+local function createToggleButton(parent, text, position)
     local btn = Instance.new("TextButton", parent)
-    btn.Text = text
-    btn.Size = UDim2.new(0, 260, 0, 40)
-    btn.Position = UDim2.new(0, 20, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(65, 15, 110)
-    btn.TextColor3 = Color3.fromRGB(230, 230, 230)
+    btn.Size = UDim2.new(0, 200, 0, 35)
+    btn.Position = position
+    btn.BackgroundColor3 = Color3.fromRGB(50, 0, 80)
+    btn.TextColor3 = Color3.fromRGB(220, 210, 255)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 18
-    btn.BorderSizePixel = 0
+    btn.TextSize = 16
+    btn.Text = text
+    btn.AutoButtonColor = false
+
     local corner = Instance.new("UICorner", btn)
-    corner.CornerRadius = UDim.new(0, 14)
-    return btn
+    corner.CornerRadius = UDim.new(0, 10)
+
+    -- Indicador ON/OFF
+    local indicator = Instance.new("Frame", btn)
+    indicator.Size = UDim2.new(0, 35, 0, 30)
+    indicator.Position = UDim2.new(1, -40, 0, 2)
+    indicator.BackgroundColor3 = Color3.fromRGB(120, 0, 180)
+    indicator.BorderSizePixel = 0
+    indicator.Visible = false
+    local indicatorCorner = Instance.new("UICorner", indicator)
+    indicatorCorner.CornerRadius = UDim.new(0, 5)
+
+    return btn, indicator
 end
 
--- Função helper para criar TextBox estilizado
-local function CreateTextBox(parent, placeholder, posY)
-    local box = Instance.new("TextBox", parent)
-    box.PlaceholderText = placeholder
-    box.Size = UDim2.new(0, 260, 0, 35)
-    box.Position = UDim2.new(0, 20, 0, posY)
-    box.BackgroundColor3 = Color3.fromRGB(50, 10, 90)
-    box.TextColor3 = Color3.fromRGB(220, 220, 220)
-    box.Font = Enum.Font.Gotham
-    box.TextSize = 16
-    box.ClearTextOnFocus = false
-    box.BorderSizePixel = 0
-    local corner = Instance.new("UICorner", box)
-    corner.CornerRadius = UDim.new(0, 12)
-    return box
+-- Função para tocar som ao clicar, passando toggle state true/false
+local function playToggleSound(state)
+    if state then
+        soundClickOn:Play()
+    else
+        soundClickOff:Play()
+    end
 end
 
--- Variables to track toggles
+-- =========================
+-- IMPLEMENTAÇÃO HOME TAB
+-- =========================
+
+-- ESP Toggle
+local espToggle, espIndicator = createToggleButton(HomeTab, "ESP ON/OFF", UDim2.new(0, 15, 0, 10))
 local espEnabled = false
-local flyEnabled = false
-local invisEnabled = false
 
--- ESP system basic implementation (highlight players)
-local Highlights = {}
+espToggle.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    espIndicator.Visible = espEnabled
+    playToggleSound(espEnabled)
 
-local function ToggleESP(state)
-    espEnabled = state
+    -- Aqui você colocaria a implementação real de ESP (contornos nos players)
     if espEnabled then
         for _, plr in pairs(Players:GetPlayers()) do
             if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                if not Highlights[plr.Name] then
+                -- Criar Highlight
+                if not plr.Character:FindFirstChild("Th1xHighlight") then
                     local hl = Instance.new("Highlight")
-                    hl.Name = "ESPHighlight"
+                    hl.Name = "Th1xHighlight"
                     hl.Adornee = plr.Character
-                    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    hl.FillColor = Color3.fromRGB(180, 0, 180) -- roxo forte
-                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    hl.Parent = player.PlayerGui
-                    Highlights[plr.Name] = hl
+                    hl.FillColor = Color3.fromRGB(150, 50, 200)
+                    hl.OutlineColor = Color3.fromRGB(100, 0, 150)
+                    hl.Parent = plr.Character
                 end
             end
         end
     else
-        for _, hl in pairs(Highlights) do
-            hl:Destroy()
+        -- Remover todos Highlights
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("Th1xHighlight") then
+                plr.Character.Th1xHighlight:Destroy()
+            end
         end
-        Highlights = {}
-    end
-end
-
--- Botão ESP
-local espBtn = CreateButton(HomeTab, "ESP ON/OFF", 20)
-espBtn.BackgroundColor3 = Color3.fromRGB(80, 10, 130)
-espBtn.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    ToggleESP(espEnabled)
-    if espEnabled then
-        espBtn.BackgroundColor3 = Color3.fromRGB(140, 40, 180)
-        soundOn:Play()
-    else
-        espBtn.BackgroundColor3 = Color3.fromRGB(80, 10, 130)
-        soundOff:Play()
     end
 end)
 
--- === FLY SYSTEM ===
+-- INVISIBILIDADE
+local invisToggle, invisIndicator = createToggleButton(HomeTab, "Invisível", UDim2.new(0, 15, 0, 60))
+local invisEnabled = false
+
+local function setInvisible(state)
+    local char = player.Character
+    if not char then return end
+    for _, part in pairs(char:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.Transparency = state and 1 or 0
+            part.CanCollide = not state
+        elseif part:IsA("Decal") then
+            part.Transparency = state and 1 or 0
+        elseif part:IsA("ParticleEmitter") then
+            part.Enabled = not state
+        end
+    end
+end
+
+invisToggle.MouseButton1Click:Connect(function()
+    invisEnabled = not invisEnabled
+    invisIndicator.Visible = invisEnabled
+    setInvisible(invisEnabled)
+    playToggleSound(invisEnabled)
+end)
+
+-- TELEPORTAR
+local tpBox = Instance.new("TextBox", HomeTab)
+tpBox.PlaceholderText = "Nome do Jogador"
+tpBox.Size = UDim2.new(0, 200, 0, 30)
+tpBox.Position = UDim2.new(0, 15, 0, 110)
+tpBox.BackgroundColor3 = Color3.fromRGB(45, 0, 80)
+tpBox.TextColor3 = Color3.fromRGB(220, 210, 255)
+tpBox.Font = Enum.Font.GothamBold
+tpBox.TextSize = 16
+local tpCorner = Instance.new("UICorner", tpBox)
+tpCorner.CornerRadius = UDim.new(0, 8)
+
+local tpBtn = Instance.new("TextButton", HomeTab)
+tpBtn.Text = "Teleportar"
+tpBtn.Size = UDim2.new(0, 200, 0, 35)
+tpBtn.Position = UDim2.new(0, 15, 0, 150)
+tpBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 150)
+tpBtn.TextColor3 = Color3.fromRGB(230, 220, 255)
+tpBtn.Font = Enum.Font.GothamBold
+tpBtn.TextSize = 16
+tpBtn.AutoButtonColor = false
+local tpBtnCorner = Instance.new("UICorner", tpBtn)
+tpBtnCorner.CornerRadius = UDim.new(0, 10)
+
+tpBtn.MouseButton1Click:Connect(function()
+    local targetName = tpBox.Text:lower():gsub("%s+", "")
+    if targetName == "" then
+        tpBtn.Text = "Digite um nome!"
+        wait(1.5)
+        tpBtn.Text = "Teleportar"
+        return
+    end
+
+    local targetPlayer = nil
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Name:lower():gsub("%s+", "") == targetName then
+            targetPlayer = plr
+            break
+        end
+    end
+
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
+        tpBtn.Text = "Teleportado!"
+        wait(1.5)
+        tpBtn.Text = "Teleportar"
+    else
+        tpBtn.Text = "Jogador não encontrado!"
+        wait(1.5)
+        tpBtn.Text = "Teleportar"
+    end
+end)
+
+-- VOO (WASD + SPACE + CTRL) clean e macabra
+local flyToggle, flyIndicator = createToggleButton(HomeTab, "Fly ON/OFF", UDim2.new(0, 15, 0, 200))
 local flying = false
-local flySpeed = 50
-local flyDirection = Vector3.new(0, 0, 0)
-local bodyVelocity = nil
+local speed = 60
+local flyForce = nil
 local bodyGyro = nil
+local bodyVelocity = nil
+
+local UserInput = UserInputService
 
 local function startFly()
-    local character = player.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") or not character:FindFirstChild("Humanoid") then return end
-
-    local hrp = character.HumanoidRootPart
-
-    bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-    bodyVelocity.Velocity = Vector3.new(0,0,0)
-    bodyVelocity.Parent = hrp
-
-    bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.MaxTorque = Vector3.new(4e5, 4e5, 4e5)
-    bodyGyro.P = 1e4
-    bodyGyro.CFrame = hrp.CFrame
-    bodyGyro.Parent = hrp
+    if flying then return end
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
     flying = true
+
+    -- Criar BodyVelocity e BodyGyro para controlar o voo
+    local root = char.HumanoidRootPart
+
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.new(0,0,0)
+    bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bodyVelocity.Parent = root
+
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.D = 10
+    bodyGyro.P = 10000
+    bodyGyro.MaxTorque = Vector3.new(4e5, 4e5, 4e5)
+    bodyGyro.Parent = root
+
+    -- Efeito visual macabro (aura roxa)
+    if not root:FindFirstChild("FlyAura") then
+        local aura = Instance.new("ParticleEmitter")
+        aura.Name = "FlyAura"
+        aura.Color = ColorSequence.new(Color3.fromRGB(150, 0, 180))
+        aura.LightEmission = 0.9
+        aura.Rate = 40
+        aura.Lifetime = NumberRange.new(0.3)
+        aura.Speed = NumberRange.new(1)
+        aura.Parent = root
+    end
 end
 
 local function stopFly()
+    if not flying then return end
+    flying = false
+
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
     if bodyVelocity then bodyVelocity:Destroy() end
     if bodyGyro then bodyGyro:Destroy() end
-    flying = false
-end
 
--- Atualização do voo com controles WASD + Space + Ctrl
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if not flying then return end
-
-    if input.KeyCode == Enum.KeyCode.W then
-        flyDirection = flyDirection + Vector3.new(0, 0, -1)
-    elseif input.KeyCode == Enum.KeyCode.S then
-        flyDirection = flyDirection + Vector3.new(0, 0, 1)
-    elseif input.KeyCode == Enum.KeyCode.A then
-        flyDirection = flyDirection + Vector3.new(-1, 0, 0)
-    elseif input.KeyCode == Enum.KeyCode.D then
-        flyDirection = flyDirection + Vector3.new(1, 0, 0)
-    elseif input.KeyCode == Enum.KeyCode.Space then
-        flyDirection = flyDirection + Vector3.new(0, 1, 0)
-    elseif input.KeyCode == Enum.KeyCode.LeftControl then
-        flyDirection = flyDirection + Vector3.new(0, -1, 0)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if not flying then return end
-
-    if input.KeyCode == Enum.KeyCode.W then
-        flyDirection = flyDirection - Vector3.new(0, 0, -1)
-    elseif input.KeyCode == Enum.KeyCode.S then
-        flyDirection = flyDirection - Vector3.new(0, 0, 1)
-    elseif input.KeyCode == Enum.KeyCode.A then
-        flyDirection = flyDirection - Vector3.new(-1, 0, 0)
-    elseif input.KeyCode == Enum.KeyCode.D then
-        flyDirection = flyDirection - Vector3.new(1, 0, 0)
-    elseif input.KeyCode == Enum.KeyCode.Space then
-        flyDirection = flyDirection - Vector3.new(0, 1, 0)
-    elseif input.KeyCode == Enum.KeyCode.LeftControl then
-        flyDirection = flyDirection - Vector3.new(0, -1, 0)
-    end
-end)
-
-RunService.Heartbeat:Connect(function()
-    if flying and bodyVelocity and bodyGyro then
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local hrp = character.HumanoidRootPart
-            local camCFrame = workspace.CurrentCamera.CFrame
-            local moveVector = flyDirection.Unit
-            if moveVector.Magnitude == 0 then
-                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-            else
-                bodyVelocity.Velocity = camCFrame:VectorToWorldSpace(moveVector * flySpeed)
-            end
-            bodyGyro.CFrame = camCFrame
-        end
-    end
-end)
-
--- Botão Fly
-local flyBtn = CreateButton(HomeTab, "Fly ON/OFF (WASD + Space + Ctrl)", 75)
-flyBtn.BackgroundColor3 = Color3.fromRGB(80, 10, 130)
-flyBtn.MouseButton1Click:Connect(function()
-    flyEnabled = not flyEnabled
-    if flyEnabled then
-        startFly()
-        flyBtn.BackgroundColor3 = Color3.fromRGB(140, 40, 180)
-        soundOn:Play()
-    else
-        stopFly()
-        flyBtn.BackgroundColor3 = Color3.fromRGB(80, 10, 130)
-        soundOff:Play()
-    end
-end)
-
--- === INVISIBILITY SYSTEM ===
-
-local function ToggleInvisibility(state)
-    invisEnabled = state
-    local character = player.Character
-    if not character then return end
-    for _, part in pairs(character:GetChildren()) do
-        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-            if invisEnabled then
-                part.Transparency = 0.7
-                if part:FindFirstChild("Decal") then
-                    part.Decal.Transparency = 0.7
-                end
-            else
-                part.Transparency = 0
-                if part:FindFirstChild("Decal") then
-                    part.Decal.Transparency = 0
-                end
-            end
-        end
-    end
-    -- Humanoid transparency (head/face)
-    local head = character:FindFirstChild("Head")
-    if head then
-        if invisEnabled then
-            for _, decal in pairs(head:GetChildren()) do
-                if decal:IsA("Decal") then
-                    decal.Transparency = 0.7
-                end
-            end
-        else
-            for _, decal in pairs(head:GetChildren()) do
-                if decal:IsA("Decal") then
-                    decal.Transparency = 0
-                end
-            end
-        end
+    -- Remover aura
+    if char.HumanoidRootPart:FindFirstChild("FlyAura") then
+        char.HumanoidRootPart.FlyAura.Enabled = false
+        wait(0.5)
+        char.HumanoidRootPart.FlyAura:Destroy()
     end
 end
 
-local invisBtn = CreateButton(HomeTab, "Invisível ON/OFF", 130)
-invisBtn.BackgroundColor3 = Color3.fromRGB(80, 10, 130)
+-- Controle do voo
+local moveVector = Vector3.new(0,0,0)
+
+UserInput.InputBegan:Connect(function(input, gameProcessed)
+    if flying then
+        if input.KeyCode == Enum.KeyCode.W then moveVector = moveVector + Vector3.new(0,0,-1) end
+        if input.KeyCode == Enum.KeyCode.S then moveVector = moveVector + Vector3.new(0,0,1) end
+        if input.KeyCode == Enum.KeyCode.A then moveVector = moveVector + Vector3.new(-1,0,0) end
+        if input.KeyCode == Enum.KeyCode.D then moveVector = moveVector + Vector3.new(1,0,0) end
+        if input.KeyCode == Enum.KeyCode.Space then moveVector = moveVector + Vector3.new(0,1,0) end
+        if input.KeyCode == Enum.KeyCode.LeftControl then moveVector = moveVector + Vector3.new(0,-1,0) end
+    end
+end)
+
+UserInput.InputEnded:Connect(function(input, gameProcessed)
+    if flying then
+        if input.KeyCode == Enum.KeyCode.W then moveVector = moveVector - Vector3.new(0,0,-1) end
+        if input.KeyCode == Enum.KeyCode.S then moveVector = moveVector - Vector3.new(0,0,1) end
+        if input.KeyCode == Enum.KeyCode.A then moveVector = moveVector - Vector3.new(-1,0,0) end
+        if input.KeyCode == Enum.KeyCode.D then moveVector = moveVector - Vector3.new(1,0,0) end
+        if input.KeyCode == Enum.KeyCode.Space then moveVector = moveVector - Vector3.new(0,1,0) end
+
+--// CONTROLE COMPLETO DO VOO
+local flySpeed = 3
+local isFlying = false
+local velocity = Instance.new("BodyVelocity")
+velocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+velocity.Name = "Th1xFlight"
+
+function enableFlight()
+	isFlying = true
+	local char = getChar()
+	local root = getRoot()
+	velocity.Parent = root
+	Starter.Sound:Play()
+
+	game:GetService("RunService").RenderStepped:Connect(function()
+		if isFlying then
+			local moveDir = Vector3.new()
+			if UIS:IsKeyDown(Enum.KeyCode.W) then moveDir += cam.CFrame.LookVector end
+			if UIS:IsKeyDown(Enum.KeyCode.S) then moveDir -= cam.CFrame.LookVector end
+			if UIS:IsKeyDown(Enum.KeyCode.A) then moveDir -= cam.CFrame.RightVector end
+			if UIS:IsKeyDown(Enum.KeyCode.D) then moveDir += cam.CFrame.RightVector end
+			if UIS:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0, 1, 0) end
+			if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir -= Vector3.new(0, 1, 0) end
+			velocity.Velocity = moveDir.Unit * flySpeed
+		end
+	end)
+end
+
+function disableFlight()
+	isFlying = false
+	velocity.Parent = nil
+end
+
+FlyBtn.MouseButton1Click:Connect(function()
+	if isFlying then
+		disableFlight()
+	else
+		enableFlight()
+	end
+end)
+
+--// ABA: OUTFIT
+local outfitText = createText("Outfit", TabBtn("Outfit"))
+outfitText.TextColor3 = Color3.fromRGB(255, 105, 180)
+
+local specialOutfit = createBtn("Roupa Demoníaca", outfitTab)
+specialOutfit.MouseButton1Click:Connect(function()
+	local hum = getChar():FindFirstChild("Humanoid")
+	if hum then
+		for _, v in ipairs(getChar():GetChildren()) do
+			if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") then v:Destroy() end
+		end
+		local shirt = Instance.new("Shirt", getChar())
+		shirt.ShirtTemplate = "rbxassetid://9421963654"
+		local pants = Instance.new("Pants", getChar())
+		pants.PantsTemplate = "rbxassetid://9421963030"
+		local horn = game:GetService("InsertService"):LoadAsset(6773662752)
+		horn.Parent = getChar()
+		horn:FindFirstChildWhichIsA("Accessory").Parent = getChar()
+	end
+end)
+
+--// ABA: RISK
+local riskText = createText("Risk", TabBtn("Risk"))
+riskText.TextColor3 = Color3.fromRGB(255, 0, 0)
+
+local invisBtn = createBtn("Ficar Invisível", riskTab)
 invisBtn.MouseButton1Click:Connect(function()
-    invisEnabled = not invisEnabled
-    ToggleInvisibility(invisEnabled)
-    if invisEnabled then
-        invisBtn.BackgroundColor3 = Color3.fromRGB(140, 40, 180)
-        soundOn:Play()
-    else
-        invisBtn.BackgroundColor3 = Color3.fromRGB(80, 10, 130)
-        soundOff:Play()
-    end
+	local root = getRoot()
+	if root then
+		root.Transparency = 1
+		for _, v in ipairs(getChar():GetDescendants()) do
+			if v:IsA("BasePart") then v.Transparency = 1 end
+		end
+	end
 end)
 
--- === TELEPORT SYSTEM ===
+local moneyBtn = createBtn("Gerar Dinheiro 💸", riskTab)
+moneyBtn.MouseButton1Click:Connect(function()
+	local money = Instance.new("BillboardGui", getChar().Head)
+	money.Size = UDim2.new(0, 200, 0, 50)
+	money.StudsOffset = Vector3.new(0, 2, 0)
+	money.AlwaysOnTop = true
 
-local tpBox = CreateTextBox(HomeTab, "Nome do Jogador para Teleportar", 180)
-local tpBtn = CreateButton(HomeTab, "Teleportar", 225)
+	local label = Instance.new("TextLabel", money)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = "+$9999"
+	label.Font = Enum.Font.GothamBlack
+	label.TextSize = 24
+	label.TextColor3 = Color3.fromRGB(0, 255, 0)
 
-tpBtn.MouseButton1Click:Connect(function()
-    local targetName = tpBox.Text
-    if targetName == "" then
-        tpBtn.Text = "Digite um nome válido"
-        task.delay(2, function() tpBtn.Text = "Teleportar" end)
-        return
-    end
-    local targetPlayer = Players:FindFirstChild(targetName)
-    if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        tpBtn.Text = "Jogador não encontrado"
-        task.delay(2, function() tpBtn.Text = "Teleportar" end)
-        return
-    end
-    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
-        soundTeleport:Play()
-    end
+	game:GetService("Debris"):AddItem(money, 3)
 end)
 
--- === OUTFIT TAB CONTENT ===
-
-local OutfitLabel = Instance.new("TextLabel", OutfitTab)
-OutfitLabel.Text = "Escolha sua roupa especial"
-OutfitLabel.Size = UDim2.new(1, 0, 0, 40)
-OutfitLabel.Position = UDim2.new(0, 0, 0, 10)
-OutfitLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
-OutfitLabel.BackgroundTransparency = 1
-OutfitLabel.Font = Enum.Font.GothamBold
-OutfitLabel.TextSize = 22
-
-local outfits = {
-    {Name = "Roupa Sombria", ShirtId = "1234567", PantsId = "7654321"},
-    {Name = "Roupa Macabra", ShirtId = "2345678", PantsId = "8765432"},
-    {Name = "Roupa Futurista", ShirtId = "3456789", PantsId = "9876543"},
-}
-
-local yPos = 60
-for _, outfit in pairs(outfits) do
-    local btn = CreateButton(OutfitTab, outfit.Name, yPos)
-    btn.MouseButton1Click:Connect(function()
-        local character = player.Character
-        if character then
-            local shirt = character:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", character)
-            shirt.ShirtTemplate = "rbxassetid://" .. outfit.ShirtId
-            local pants = character:FindFirstChildOfClass("Pants") or Instance.new("Pants", character)
-            pants.PantsTemplate = "rbxassetid://" .. outfit.PantsId
-            soundOn:Play()
-        end
-    end)
-    yPos = yPos + 50
-end
-
--- === RISK TAB CONTENT ===
-
-local moneyAmountBox = CreateTextBox(RiskTab, "Digite a quantia de dinheiro para adicionar", 20)
-local addMoneyBtn = CreateButton(RiskTab, "Adicionar Dinheiro", 70)
-
-addMoneyBtn.MouseButton1Click:Connect(function()
-    local amount = tonumber(moneyAmountBox.Text)
-    if not amount or amount <= 0 then
-        addMoneyBtn.Text = "Digite um valor válido"
-        task.delay(2, function() addMoneyBtn.Text = "Adicionar Dinheiro" end)
-        return
-    end
-    -- Exemplo: adicionar dinheiro - adaptável conforme seu sistema
-    local leaderstats = player:FindFirstChild("leaderstats")
-    if leaderstats and leaderstats:FindFirstChild("Money") then
-        leaderstats.Money.Value = leaderstats.Money.Value + amount
-        addMoneyBtn.Text = "Dinheiro adicionado!"
-        soundOn:Play()
-        task.delay(2, function() addMoneyBtn.Text = "Adicionar Dinheiro" end)
-    else
-        addMoneyBtn.Text = "Erro ao encontrar leaderstats"
-        soundOff:Play()
-        task.delay(2, function() addMoneyBtn.Text = "Adicionar Dinheiro" end)
-    end
-end)
-
--- === MINIMIZE / RESTORE BUTTON ===
-
-local minimizeBtn = Instance.new("TextButton", MainFrame)
-minimizeBtn.Text = "_"
-minimizeBtn.Font = Enum.Font.GothamBold
-minimizeBtn.TextSize = 28
-minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
-minimizeBtn.Position = UDim2.new(1, -35, 0, 5)
-minimizeBtn.BackgroundColor3 = Color3.fromRGB(50, 0, 80)
-minimizeBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
-minimizeBtn.BorderSizePixel = 0
-local corner = Instance.new("UICorner", minimizeBtn)
-corner.CornerRadius = UDim.new(0, 6)
-
-local minimized = false
+--// MINIMIZAR / RESTAURAR MENU
+local isMinimized = false
+local minimizeBtn = createBtn("Minimizar", homeTab)
+minimizeBtn.Text = "-"
+minimizeBtn.Size = UDim2.new(0, 20, 0, 20)
+minimizeBtn.Position = UDim2.new(1, -30, 0, 5)
 
 minimizeBtn.MouseButton1Click:Connect(function()
-    if minimized then
-        MainFrame.Size = UDim2.new(0, 320, 0, 420)
-        for _, child in pairs(MainFrame:GetChildren()) do
-            if child ~= minimizeBtn then
-                child.Visible = true
-            end
-        end
-        minimized = false
-        minimizeBtn.Text = "_"
-    else
-        for _, child in pairs(MainFrame:GetChildren()) do
-            if child ~= minimizeBtn then
-                child.Visible = false
-            end
-        end
-        MainFrame.Size = UDim2.new(0, 60, 0, 40)
-        minimized = true
-        minimizeBtn.Text = "◣"
-    end
+	if isMinimized then
+		main.Position = UDim2.new(0.5, -200, 0.5, -150)
+		main.Visible = true
+		isMinimized = false
+		local restoreSound = Instance.new("Sound", main)
+		restoreSound.SoundId = "rbxassetid://9118823106"
+		restoreSound.Volume = 0.6
+		restoreSound:Play()
+	else
+		main.Visible = false
+		isMinimized = true
+	end
 end)
 
--- === Inicializar aba HOME ao abrir ===
-CurrentTab = HomeTab
-HomeTab.Visible = true
-OutfitTab.Visible = false
-RiskTab.Visible = false
-
--- Sombras e efeitos macabros podem ser adicionados via sombras das UIs, gradientes etc, mas por simplicidade, mantive o básico.
-
--- Variáveis de controle
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local flySpeed = 50
-local flying = false
-local flyVelocity = Vector3.new(0, 0, 0)
-
--- Função pra ativar/desativar ESP (exemplo simples)
-local function ToggleESP(state)
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = plr.Character.HumanoidRootPart
-            local box = hrp:FindFirstChild("ESPBox")
-            if state then
-                if not box then
-                    box = Instance.new("BoxHandleAdornment")
-                    box.Name = "ESPBox"
-                    box.Adornee = hrp
-                    box.AlwaysOnTop = true
-                    box.ZIndex = 10
-                    box.Size = Vector3.new(4, 6, 2)
-                    box.Color3 = Color3.fromRGB(160, 60, 180)
-                    box.Transparency = 0.5
-                    box.Parent = hrp
-                end
-            else
-                if box then
-                    box:Destroy()
-                end
-            end
-        end
-    end
-end
-
--- Função para toggle invisibilidade
-local function ToggleInvisibility(state)
-    local character = player.Character
-    if character then
-        for _, part in pairs(character:GetChildren()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                part.Transparency = state and 0.8 or 0
-                if part:FindFirstChildOfClass("Decal") then
-                    for _, decal in pairs(part:GetChildren()) do
-                        if decal:IsA("Decal") then
-                            decal.Transparency = state and 1 or 0
-                        end
-                    end
-                end
-            elseif part:IsA("Accessory") then
-                if part.Handle then
-                    part.Handle.Transparency = state and 0.8 or 0
-                end
-            end
-        end
-    end
-end
-
--- Controle de voo: ativar/desativar fly
-local function FlyToggle(state)
-    flying = state
-    local character = player.Character
-    if flying and character and character:FindFirstChild("HumanoidRootPart") and character:FindFirstChild("Humanoid") then
-        local hrp = character.HumanoidRootPart
-        local humanoid = character.Humanoid
-
-        -- Desativar gravidade para humanoid
-        humanoid.PlatformStand = true
-
-        -- Criar BodyVelocity para movimento
-        local bodyVel = hrp:FindFirstChild("FlyVelocity")
-        if not bodyVel then
-            bodyVel = Instance.new("BodyVelocity")
-            bodyVel.Name = "FlyVelocity"
-            bodyVel.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-            bodyVel.Velocity = Vector3.new(0, 0, 0)
-            bodyVel.Parent = hrp
-        end
-
-        -- Controlador de direção
-        local moveDir = Vector3.new()
-        local speed = flySpeed
-
-        -- Input tracking
-        local forward = false
-        local backward = false
-        local left = false
-        local right = false
-        local up = false
-        local down = false
-
-        -- Conexões para Input
-        local inputBeganConn, inputEndedConn
-
-        inputBeganConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-            if gameProcessed then return end
-            if input.KeyCode == Enum.KeyCode.W then forward = true end
-            if input.KeyCode == Enum.KeyCode.S then backward = true end
-            if input.KeyCode == Enum.KeyCode.A then left = true end
-            if input.KeyCode == Enum.KeyCode.D then right = true end
-            if input.KeyCode == Enum.KeyCode.Space then up = true end
-            if input.KeyCode == Enum.KeyCode.LeftControl then down = true end
-        end)
-
-        inputEndedConn = UserInputService.InputEnded:Connect(function(input, gameProcessed)
-            if gameProcessed then return end
-            if input.KeyCode == Enum.KeyCode.W then forward = false end
-            if input.KeyCode == Enum.KeyCode.S then backward = false end
-            if input.KeyCode == Enum.KeyCode.A then left = false end
-            if input.KeyCode == Enum.KeyCode.D then right = false end
-            if input.KeyCode == Enum.KeyCode.Space then up = false end
-            if input.KeyCode == Enum.KeyCode.LeftControl then down = false end
-        end)
-
-        -- Atualizar movimento a cada frame
-        local flyConnection
-        flyConnection = RunService.Heartbeat:Connect(function()
-            if not flying then
-                flyConnection:Disconnect()
-                if bodyVel then bodyVel:Destroy() end
-                humanoid.PlatformStand = false
-                inputBeganConn:Disconnect()
-                inputEndedConn:Disconnect()
-                return
-            end
-
-            local camCFrame = workspace.CurrentCamera.CFrame
-            local moveVec = Vector3.new()
-
-            if forward then moveVec = moveVec + camCFrame.LookVector end
-            if backward then moveVec = moveVec - camCFrame.LookVector end
-            if left then moveVec = moveVec - camCFrame.RightVector end
-            if right then moveVec = moveVec + camCFrame.RightVector end
-            if up then moveVec = moveVec + Vector3.new(0, 1, 0) end
-            if down then moveVec = moveVec - Vector3.new(0, 1, 0) end
-
-            if moveVec.Magnitude > 0 then
-                moveVec = moveVec.Unit * speed
-            end
-
-            bodyVel.Velocity = moveVec
-        end)
-
-    elseif not flying then
-        local character = player.Character
-        if character and character:FindFirstChild("Humanoid") then
-            character.Humanoid.PlatformStand = false
-            local bodyVel = character.HumanoidRootPart:FindFirstChild("FlyVelocity")
-            if bodyVel then bodyVel:Destroy() end
-        end
-    end
-end
-
--- Configurar toggles com feedback visual e sonoro
-
-SetupToggleButton(espBtn, "espEnabled", function(state)
-    ToggleESP(state)
-end)
-
-SetupToggleButton(flyBtn, "flyEnabled", function(state)
-    FlyToggle(state)
-end)
-
-SetupToggleButton(invisBtn, "invisEnabled", function(state)
-    ToggleInvisibility(state)
-end)
-
--- Teleporte com som e feedback
-tpBtn.MouseButton1Click:Connect(function()
-    AnimateButton(tpBtn)
-    local targetName = tpBox.Text
-    if targetName == "" then
-        tpBtn.Text = "Digite um nome válido"
-        task.delay(2, function() tpBtn.Text = "Teleportar" end)
-        return
-    end
-    local targetPlayer = Players:FindFirstChild(targetName)
-    if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        tpBtn.Text = "Jogador não encontrado"
-        soundOff:Play()
-        task.delay(2, function() tpBtn.Text = "Teleportar" end)
-        return
-    end
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
-        soundTeleport:Play()
-    end
+--// ATALHO PARA ESCONDER / RESTAURAR MENU
+UIS.InputBegan:Connect(function(input, gpe)
+	if not gpe and input.KeyCode == Enum.KeyCode.M then
+		main.Visible = not main.Visible
+		local toggleSound = Instance.new("Sound", main)
+		toggleSound.SoundId = "rbxassetid://12222216"
+		toggleSound.Volume = 0.3
+		toggleSound:Play()
+	end
 end)
