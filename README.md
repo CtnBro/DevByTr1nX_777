@@ -343,6 +343,33 @@ end)
 local invisEnabled = false
 local invisPartsCache = {}
 
+local function setTransparencyRecursive(instance, transparency)
+    if invisEnabled then
+        -- Armazena estado original só quando ativar invisibilidade
+        if not invisPartsCache[instance] then
+            invisPartsCache[instance] = {
+                Transparency = instance.Transparency,
+                CanCollide = instance:IsA("BasePart") and instance.CanCollide or nil
+            }
+        end
+    end
+
+    if instance:IsA("BasePart") then
+        instance.Transparency = transparency
+        if invisEnabled then
+            instance.CanCollide = false
+        elseif not invisEnabled and invisPartsCache[instance] and invisPartsCache[instance].CanCollide ~= nil then
+            instance.CanCollide = invisPartsCache[instance].CanCollide
+        end
+    elseif instance:IsA("Decal") or instance:IsA("Texture") or instance:IsA("SpecialMesh") then
+        instance.Transparency = transparency
+    end
+
+    for _, child in ipairs(instance:GetChildren()) do
+        setTransparencyRecursive(child, transparency)
+    end
+end
+
 invisToggle.MouseButton1Click:Connect(function()
     invisEnabled = not invisEnabled
 
@@ -356,25 +383,10 @@ invisToggle.MouseButton1Click:Connect(function()
     local character = player.Character
     if character then
         if invisEnabled then
-            -- Armazena estados originais para restaurar depois
-            invisPartsCache = {}
-            for _, part in pairs(character:GetChildren()) do
-                if part:IsA("BasePart") then
-                    invisPartsCache[part] = {
-                        Transparency = part.Transparency,
-                        CanCollide = part.CanCollide,
-                    }
-                    part.Transparency = 1
-                    part.CanCollide = false
-                elseif part:IsA("Decal") or part:IsA("MeshPart") then
-                    invisPartsCache[part] = {
-                        Transparency = part.Transparency
-                    }
-                    part.Transparency = 1
-                end
-            end
+            invisPartsCache = {} -- limpa cache
+            setTransparencyRecursive(character, 1)
         else
-            -- Restaura os estados originais para evitar "quadrado cinza"
+            -- Restaura transparência original e CanCollide
             for part, state in pairs(invisPartsCache) do
                 if part and part.Parent then
                     part.Transparency = state.Transparency or 0
