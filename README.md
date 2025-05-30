@@ -14,7 +14,7 @@ local Frame = Instance.new("Frame")
 Frame.Name = "MainFrame"
 Frame.Size = UDim2.new(0, 450, 0, 360)
 Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(25, 0, 40)
+Frame.BackgroundColor3 = Color3.fromRGB(40, 0, 70) -- Roxo escuro
 Frame.BorderSizePixel = 0
 Frame.Active = true
 Frame.Draggable = true
@@ -27,25 +27,25 @@ UICorner.Parent = Frame
 local TabHolder = Instance.new("Frame")
 TabHolder.Size = UDim2.new(0, 110, 1, -30)
 TabHolder.Position = UDim2.new(0, 0, 0, 30)
-TabHolder.BackgroundColor3 = Color3.fromRGB(40, 0, 60)
+TabHolder.BackgroundColor3 = Color3.fromRGB(30, 0, 50) -- Roxo mais escuro
 TabHolder.BorderSizePixel = 0
 TabHolder.Parent = Frame
 
 local Layout = Instance.new("UIListLayout")
 Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.Padding = UDim.new(0, 4)
+Layout.Padding = UDim.new(0, 6)
 Layout.Parent = TabHolder
 
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 30)
-TopBar.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+TopBar.BackgroundColor3 = Color3.fromRGB(70, 0, 100) -- Roxo vibrante
 TopBar.BorderSizePixel = 0
 TopBar.Parent = Frame
 
 local Title = Instance.new("TextLabel")
 Title.Text = "Tr1X Menu Macabro"
 Title.Font = Enum.Font.GothamBlack
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextColor3 = Color3.fromRGB(230, 200, 255) -- Roxo claro
 Title.TextSize = 16
 Title.BackgroundTransparency = 1
 Title.Size = UDim2.new(1, -40, 1, 0)
@@ -56,9 +56,9 @@ Title.Parent = TopBar
 local Close = Instance.new("TextButton")
 Close.Text = "-"
 Close.Font = Enum.Font.GothamBold
-Close.TextColor3 = Color3.fromRGB(255, 255, 255)
+Close.TextColor3 = Color3.fromRGB(230, 200, 255)
 Close.TextSize = 20
-Close.BackgroundColor3 = Color3.fromRGB(80, 0, 100)
+Close.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
 Close.Size = UDim2.new(0, 30, 1, 0)
 Close.Position = UDim2.new(1, -30, 0, 0)
 Close.Parent = TopBar
@@ -67,10 +67,10 @@ local MiniIcon = Instance.new("TextButton")
 MiniIcon.Text = "Tr1X"
 MiniIcon.Font = Enum.Font.GothamBold
 MiniIcon.TextSize = 14
-MiniIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+MiniIcon.TextColor3 = Color3.fromRGB(230, 200, 255)
 MiniIcon.Size = UDim2.new(0, 100, 0, 30)
 MiniIcon.Position = UDim2.new(0, 10, 1, -40)
-MiniIcon.BackgroundColor3 = Color3.fromRGB(40, 0, 60)
+MiniIcon.BackgroundColor3 = Color3.fromRGB(30, 0, 50)
 MiniIcon.Visible = false
 MiniIcon.Parent = gui
 
@@ -93,21 +93,29 @@ function CreateTab(name)
     btn.Text = name
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
-    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.TextColor3 = Color3.fromRGB(230, 200, 255)
     btn.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+    btn.AutoButtonColor = false
+
+    local UICornerBtn = Instance.new("UICorner")
+    UICornerBtn.CornerRadius = UDim.new(0, 6)
+    UICornerBtn.Parent = btn
 
     local tabFrame = Instance.new("Frame")
     tabFrame.Size = UDim2.new(1, -110, 1, -30)
     tabFrame.Position = UDim2.new(0, 110, 0, 30)
-    tabFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 30)
+    tabFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 40)
+    tabFrame.BorderSizePixel = 0
     tabFrame.Visible = false
     tabFrame.Parent = Frame
 
     btn.MouseButton1Click:Connect(function()
         for _, tab in ipairs(TabList) do
             tab.Frame.Visible = false
+            tab.Button.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
         end
         tabFrame.Visible = true
+        btn.BackgroundColor3 = Color3.fromRGB(90, 0, 130)
         CurrentTab = tabFrame
     end)
 
@@ -115,6 +123,12 @@ function CreateTab(name)
     table.insert(TabList, {Button = btn, Frame = tabFrame})
     return tabFrame
 end
+
+-- Inicializar a primeira aba como visível
+local HomeTab = CreateTab("Home")
+HomeTab.Visible = true
+CurrentTab = HomeTab
+TabList[1].Button.BackgroundColor3 = Color3.fromRGB(90, 0, 130)
 
 -- ⬇️ CONTINUA NA PARTE 2 ⬇️
 
