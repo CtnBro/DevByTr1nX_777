@@ -124,78 +124,128 @@ function CreateTab(name)
     return tabFrame
 end
 
--- Inicializar a primeira aba como visível
-local HomeTab = CreateTab("Home")
-HomeTab.Visible = true
-CurrentTab = HomeTab
-TabList[1].Button.BackgroundColor3 = Color3.fromRGB(90, 0, 130)
-
--- ⬇️ CONTINUA NA PARTE 2 ⬇️
-
--- Criar as abas principais
+-- Criar abas principais (APENAS UMA VEZ)
 local HomeTab = CreateTab("Home")
 local OutfitTab = CreateTab("Outfit")
 local RiskTab = CreateTab("Risk")
 
-CurrentTab = HomeTab
+-- Inicializar estado visível da Home
 HomeTab.Visible = true
-CurrentTab.Visible = true
-local espToggle = Instance.new("TextButton", HomeTab)
+OutfitTab.Visible = false
+RiskTab.Visible = false
+CurrentTab = HomeTab
+
+-- Ajustar botão da aba atual
+for _, tab in ipairs(TabList) do
+    if tab.Frame == CurrentTab then
+        tab.Button.BackgroundColor3 = Color3.fromRGB(90, 0, 130)
+    else
+        tab.Button.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+    end
+end
+
+-- ===== Conteúdo da aba Home =====
+local espToggle = Instance.new("TextButton")
 espToggle.Text = "ESP ON/OFF"
 espToggle.Size = UDim2.new(0, 200, 0, 30)
-espToggle.Position = UDim2.new(0, 110, 0, 10)
+espToggle.Position = UDim2.new(0, 10, 0, 10)
 espToggle.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
 espToggle.TextColor3 = Color3.new(1, 1, 1)
 espToggle.Font = Enum.Font.GothamBold
 espToggle.TextSize = 14
+espToggle.Parent = HomeTab
 
-local flyToggle = Instance.new("TextButton", HomeTab)
+local flyToggle = Instance.new("TextButton")
 flyToggle.Text = "Fly ON/OFF (CTRL)"
 flyToggle.Size = UDim2.new(0, 200, 0, 30)
-flyToggle.Position = UDim2.new(0, 110, 0, 50)
+flyToggle.Position = UDim2.new(0, 10, 0, 50)
 flyToggle.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
 flyToggle.TextColor3 = Color3.new(1, 1, 1)
 flyToggle.Font = Enum.Font.GothamBold
 flyToggle.TextSize = 14
+flyToggle.Parent = HomeTab
 
-local invisToggle = Instance.new("TextButton", HomeTab)
+local invisToggle = Instance.new("TextButton")
 invisToggle.Text = "Invisível"
 invisToggle.Size = UDim2.new(0, 200, 0, 30)
-invisToggle.Position = UDim2.new(0, 110, 0, 90)
+invisToggle.Position = UDim2.new(0, 10, 0, 90)
 invisToggle.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
 invisToggle.TextColor3 = Color3.new(1, 1, 1)
 invisToggle.Font = Enum.Font.GothamBold
 invisToggle.TextSize = 14
+invisToggle.Parent = HomeTab
 
-local tpBox = Instance.new("TextBox", HomeTab)
+local tpBox = Instance.new("TextBox")
 tpBox.PlaceholderText = "Nome do Jogador"
 tpBox.Size = UDim2.new(0, 200, 0, 30)
-tpBox.Position = UDim2.new(0, 110, 0, 130)
+tpBox.Position = UDim2.new(0, 10, 0, 130)
 tpBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 tpBox.TextColor3 = Color3.new(1, 1, 1)
 tpBox.Font = Enum.Font.Gotham
+tpBox.Parent = HomeTab
 
-local tpBtn = Instance.new("TextButton", HomeTab)
+local tpBtn = Instance.new("TextButton")
 tpBtn.Text = "Teleportar"
 tpBtn.Size = UDim2.new(0, 200, 0, 30)
-tpBtn.Position = UDim2.new(0, 110, 0, 170)
+tpBtn.Position = UDim2.new(0, 10, 0, 170)
 tpBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
 tpBtn.TextColor3 = Color3.new(1, 1, 1)
 tpBtn.Font = Enum.Font.GothamBold
 tpBtn.TextSize = 14
+tpBtn.Parent = HomeTab
 
--- FUNÇÃO DE ESP SIMPLES (DEMO)
+-- Exemplo de função ESP simples (demo)
 local espEnabled = false
 espToggle.MouseButton1Click:Connect(function()
 	espEnabled = not espEnabled
-	-- Som de clique
 	local sound = Instance.new("Sound", espToggle)
 	sound.SoundId = "rbxassetid://9118823109"
 	sound:Play()
 	game.Debris:AddItem(sound, 2)
-	-- Aqui você pode adicionar sua lógica de ESP
 	print("ESP toggled:", espEnabled)
 end)
+
+-- ===== Conteúdo da aba Outfit =====
+local outfitButton1 = Instance.new("TextButton")
+outfitButton1.Text = "Roupa 1"
+outfitButton1.Size = UDim2.new(0, 200, 0, 30)
+outfitButton1.Position = UDim2.new(0, 10, 0, 10)
+outfitButton1.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+outfitButton1.TextColor3 = Color3.new(1, 1, 1)
+outfitButton1.Font = Enum.Font.GothamBold
+outfitButton1.TextSize = 14
+outfitButton1.Parent = OutfitTab
+
+local outfitButton2 = Instance.new("TextButton")
+outfitButton2.Text = "Roupa 2"
+outfitButton2.Size = UDim2.new(0, 200, 0, 30)
+outfitButton2.Position = UDim2.new(0, 10, 0, 50)
+outfitButton2.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+outfitButton2.TextColor3 = Color3.new(1, 1, 1)
+outfitButton2.Font = Enum.Font.GothamBold
+outfitButton2.TextSize = 14
+outfitButton2.Parent = OutfitTab
+
+-- ===== Conteúdo da aba Risk =====
+local riskButton1 = Instance.new("TextButton")
+riskButton1.Text = "Ativar Risco"
+riskButton1.Size = UDim2.new(0, 200, 0, 30)
+riskButton1.Position = UDim2.new(0, 10, 0, 10)
+riskButton1.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+riskButton1.TextColor3 = Color3.new(1, 1, 1)
+riskButton1.Font = Enum.Font.GothamBold
+riskButton1.TextSize = 14
+riskButton1.Parent = RiskTab
+
+local riskButton2 = Instance.new("TextButton")
+riskButton2.Text = "Desativar Risco"
+riskButton2.Size = UDim2.new(0, 200, 0, 30)
+riskButton2.Position = UDim2.new(0, 10, 0, 50)
+riskButton2.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+riskButton2.TextColor3 = Color3.new(1, 1, 1)
+riskButton2.Font = Enum.Font.GothamBold
+riskButton2.TextSize = 14
+riskButton2.Parent = RiskTab
 
 -- Continuar na próxima parte com: Fly system, Invisível, Teleporte, Outfit e Risk
 -- Continuação do menu a partir da linha 187
