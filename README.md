@@ -253,7 +253,6 @@ riskButton2.Parent = RiskTab
 -- === SISTEMA DE VOO ===
 local flying = false
 local flightSpeed = 50
-local flightForce
 local bodyVelocity
 local bodyGyro
 
@@ -267,7 +266,7 @@ function createFlight()
     if not humanoidRootPart then return end
 
     bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.Velocity = Vector3.new(0,0,0)
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
     bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
     bodyVelocity.Parent = humanoidRootPart
 
@@ -287,8 +286,6 @@ function destroyFlight()
     end
 end
 
-local flightDirection = Vector3.new(0,0,0)
-
 local function updateFlight()
     if not flying then return end
     local character = player.Character
@@ -299,20 +296,20 @@ local function updateFlight()
     local camera = workspace.CurrentCamera
     local camCFrame = camera.CFrame
 
-    local moveDirection = Vector3.new(0,0,0)
-    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + camCFrame.LookVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - camCFrame.LookVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - camCFrame.RightVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + camCFrame.RightVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0,1,0) end
-    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection = moveDirection - Vector3.new(0,1,0) end
+    local moveDirection = Vector3.new(0, 0, 0)
+    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDirection += camCFrame.LookVector end
+    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDirection -= camCFrame.LookVector end
+    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDirection -= camCFrame.RightVector end
+    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDirection += camCFrame.RightVector end
+    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDirection += Vector3.new(0, 1, 0) end
+    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection -= Vector3.new(0, 1, 0) end
 
     if moveDirection.Magnitude > 0 then
         moveDirection = moveDirection.Unit * flightSpeed
     end
 
     bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-    bodyVelocity.Velocity = Vector3.new(moveDirection.X, moveDirection.Y, moveDirection.Z)
+    bodyVelocity.Velocity = moveDirection
 
     bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
     bodyGyro.CFrame = camCFrame
@@ -344,6 +341,7 @@ end)
 
 -- === INVISIBILIDADE ===
 local invisEnabled = false
+local invisPartsCache = {}
 
 invisToggle.MouseButton1Click:Connect(function()
     invisEnabled = not invisEnabled
@@ -357,13 +355,35 @@ invisToggle.MouseButton1Click:Connect(function()
 
     local character = player.Character
     if character then
-        for _, part in pairs(character:GetChildren()) do
-            if part:IsA("BasePart") or part:IsA("Decal") or part:IsA("MeshPart") then
-                part.Transparency = invisEnabled and 1 or 0
+        if invisEnabled then
+            -- Armazena estados originais para restaurar depois
+            invisPartsCache = {}
+            for _, part in pairs(character:GetChildren()) do
                 if part:IsA("BasePart") then
-                    part.CanCollide = not invisEnabled
+                    invisPartsCache[part] = {
+                        Transparency = part.Transparency,
+                        CanCollide = part.CanCollide,
+                    }
+                    part.Transparency = 1
+                    part.CanCollide = false
+                elseif part:IsA("Decal") or part:IsA("MeshPart") then
+                    invisPartsCache[part] = {
+                        Transparency = part.Transparency
+                    }
+                    part.Transparency = 1
                 end
             end
+        else
+            -- Restaura os estados originais para evitar "quadrado cinza"
+            for part, state in pairs(invisPartsCache) do
+                if part and part.Parent then
+                    part.Transparency = state.Transparency or 0
+                    if state.CanCollide ~= nil then
+                        part.CanCollide = state.CanCollide
+                    end
+                end
+            end
+            invisPartsCache = {}
         end
     end
 end)
