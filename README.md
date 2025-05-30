@@ -1,215 +1,298 @@
+-- GUI Th1x Menu Script by Tr1nX_777 | Versão Expandida Sombria
+
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local PlayerGui = player:WaitForChild("PlayerGui")
 
-local ScreenGui = Instance.new("ScreenGui", playerGui)
-ScreenGui.Name = "Th1xDevMenu"
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.ResetOnSpawn = false
-
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 400, 0, 300)
-MainFrame.Position = UDim2.new(0.35, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 0, 25)
-MainFrame.Visible = true
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-
-local UICorner = Instance.new("UICorner", MainFrame)
-UICorner.CornerRadius = UDim.new(0, 12)
-
--- Aba lateral
-local SideBar = Instance.new("Frame", MainFrame)
-SideBar.Size = UDim2.new(0, 100, 1, 0)
-SideBar.Position = UDim2.new(0, 0, 0, 0)
-SideBar.BackgroundColor3 = Color3.fromRGB(15, 0, 15)
-local sideCorner = Instance.new("UICorner", SideBar)
-sideCorner.CornerRadius = UDim.new(0, 12)
-
-local tabs = {
-    "Home",
-    "Outfit",
-    "Risk"
-}
-
-local contentFrames = {}
-
-for i, tabName in ipairs(tabs) do
-	local btn = Instance.new("TextButton", SideBar)
-	btn.Size = UDim2.new(1, 0, 0, 40)
-	btn.Position = UDim2.new(0, 0, 0, (i - 1) * 45 + 10)
-	btn.Text = tabName
-	btn.BackgroundColor3 = Color3.fromRGB(35, 0, 35)
-	btn.TextColor3 = Color3.fromRGB(255, 0, 255)
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 14
-	local btnCorner = Instance.new("UICorner", btn)
-	btnCorner.CornerRadius = UDim.new(0, 8)
-
-	local frame = Instance.new("Frame", MainFrame)
-	frame.Size = UDim2.new(1, -110, 1, -20)
-	frame.Position = UDim2.new(0, 110, 0, 10)
-	frame.BackgroundColor3 = Color3.fromRGB(20, 0, 20)
-	frame.Visible = (i == 1)
-	contentFrames[tabName] = frame
-
-	btn.MouseButton1Click:Connect(function()
-		for _, f in pairs(contentFrames) do f.Visible = false end
-		frame.Visible = true
-	end)
+-- Sons usados para feedback
+local function createSound(parent, soundId)
+    local sound = Instance.new("Sound")
+    sound.SoundId = soundId
+    sound.Volume = 0.5
+    sound.Parent = parent
+    return sound
 end
 
--- HOME TAB CONTENT
-do
-	local home = contentFrames["Home"]
+-- Som de ativar/desativar
+local soundOn = createSound(PlayerGui, "rbxassetid://9118822020")  -- som de clique positivo
+local soundOff = createSound(PlayerGui, "rbxassetid://9118822050") -- som de clique negativo
 
-	local function createButton(text, y, callback)
-		local btn = Instance.new("TextButton", home)
-		btn.Size = UDim2.new(0, 220, 0, 35)
-		btn.Position = UDim2.new(0, 20, 0, y)
-		btn.Text = text
-		btn.BackgroundColor3 = Color3.fromRGB(60, 0, 60)
-		btn.TextColor3 = Color3.fromRGB(255, 0, 255)
-		btn.Font = Enum.Font.GothamBold
-		btn.TextSize = 14
-		local corner = Instance.new("UICorner", btn)
-		corner.CornerRadius = UDim.new(0, 8)
-		btn.MouseButton1Click:Connect(callback)
-	end
+-- Função para criar botão com borda e canto arredondado
+local function createButton(parent, text, position)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 200, 0, 30)
+    btn.Position = position
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    btn.TextColor3 = Color3.fromRGB(230, 230, 230)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 16
+    btn.Text = text
+    btn.AutoButtonColor = false
+    btn.Parent = parent
 
-	createButton("🔍 ESP", 10, function()
-		for _, v in pairs(Players:GetPlayers()) do
-			if v ~= player then
-				local tag = Instance.new("BillboardGui", v.Character:FindFirstChild("Head") or v.Character:FindFirstChildOfClass("Part"))
-				tag.Size = UDim2.new(0, 100, 0, 40)
-				tag.AlwaysOnTop = true
-				local txt = Instance.new("TextLabel", tag)
-				txt.Size = UDim2.new(1, 0, 1, 0)
-				txt.BackgroundTransparency = 1
-				txt.Text = v.Name
-				txt.TextColor3 = Color3.new(1, 0, 0)
-				txt.Font = Enum.Font.GothamBold
-				txt.TextScaled = true
-			end
-		end
-	end)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
 
-	createButton("🦅 Voar", 55, function()
-		local flySpeed = 50
-		local UIS = game:GetService("UserInputService")
-		local flying = true
-		local cam = workspace.CurrentCamera
-		local bodyVel = Instance.new("BodyVelocity", player.Character:WaitForChild("HumanoidRootPart"))
-		bodyVel.Velocity = Vector3.zero
-		bodyVel.MaxForce = Vector3.new(9999, 9999, 9999)
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.Thickness = 1.5
+    stroke.Parent = btn
 
-		UIS.InputBegan:Connect(function(input)
-			if flying then
-				if input.KeyCode == Enum.KeyCode.W then
-					bodyVel.Velocity = cam.CFrame.LookVector * flySpeed
-				elseif input.KeyCode == Enum.KeyCode.S then
-					bodyVel.Velocity = -cam.CFrame.LookVector * flySpeed
-				elseif input.KeyCode == Enum.KeyCode.Space then
-					bodyVel.Velocity = Vector3.new(0, flySpeed, 0)
-				end
-			end
-		end)
+    -- Efeito hover dark glow
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70, 0, 0)}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 35, 35)}):Play()
+    end)
 
-		UIS.InputEnded:Connect(function(input)
-			if flying then
-				bodyVel.Velocity = Vector3.zero
-			end
-		end)
-	end)
-
-	createButton("🫥 Invisível", 100, function()
-		for _, v in pairs(player.Character:GetDescendants()) do
-			if v:IsA("BasePart") then v.Transparency = 1 end
-			if v:IsA("Decal") then v.Transparency = 1 end
-		end
-	end)
-
-	createButton("🧍 Teleport até Player", 145, function()
-		local name = game:GetService("Players"):FindFirstChild(game:GetService("StarterGui"):PromptInput("Digite o nome do player"))
-		if name and name.Character then
-			player.Character:MoveTo(name.Character:FindFirstChild("HumanoidRootPart").Position)
-		end
-	end)
+    return btn
 end
 
--- OUTFIT TAB CONTENT
-do
-	local outfit = contentFrames["Outfit"]
+-- Criando GUI base
+local gui = Instance.new("ScreenGui")
+gui.Name = "Th1xDevMenu"
+gui.ResetOnSpawn = false
+gui.Parent = PlayerGui
 
-	local function createButton(text, y, applyFunc)
-		local btn = Instance.new("TextButton", outfit)
-		btn.Size = UDim2.new(0, 220, 0, 35)
-		btn.Position = UDim2.new(0, 20, 0, y)
-		btn.Text = text
-		btn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-		btn.TextColor3 = Color3.new(1, 1, 1)
-		btn.Font = Enum.Font.GothamBold
-		btn.TextSize = 14
-		local corner = Instance.new("UICorner", btn)
-		corner.CornerRadius = UDim.new(0, 8)
-		btn.MouseButton1Click:Connect(applyFunc)
-	end
+local Frame = Instance.new("Frame", gui)
+Frame.Size = UDim2.new(0, 420, 0, 360)
+Frame.Position = UDim2.new(0.3, 0, 0.2, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
 
-	createButton("GRG Store (Cenoura)", 10, function()
-		for _, v in pairs(player.Character:GetDescendants()) do
-			if v:IsA("BasePart") then v.BrickColor = BrickColor.new("Bright orange") end
-		end
-	end)
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 16)
 
-	createButton("Tr1nX_777 (Macabro)", 55, function()
-		for _, v in pairs(player.Character:GetDescendants()) do
-			if v:IsA("BasePart") then v.Color = Color3.fromRGB(30, 0, 30) end
-		end
-	end)
+local TabHolder = Instance.new("Frame", Frame)
+TabHolder.Size = UDim2.new(0, 120, 0, 320)
+TabHolder.Position = UDim2.new(0, 0, 0, 40)
+TabHolder.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+local cornerTab = Instance.new("UICorner", TabHolder)
+cornerTab.CornerRadius = UDim.new(0, 14)
+
+local Layout = Instance.new("UIListLayout", TabHolder)
+Layout.SortOrder = Enum.SortOrder.LayoutOrder
+Layout.Padding = UDim.new(0, 8)
+
+-- Área conteúdo da aba
+local ContentFrame = Instance.new("Frame", Frame)
+ContentFrame.Size = UDim2.new(1, -130, 1, -40)
+ContentFrame.Position = UDim2.new(0, 130, 0, 40)
+ContentFrame.BackgroundTransparency = 1
+
+local tabs = {}
+local currentTab
+
+local function createTab(name)
+    local button = createButton(TabHolder, name, UDim2.new(0, 0, 0, 0))
+    button.Size = UDim2.new(1, 0, 0, 40)
+    button.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+    
+    local tabFrame = Instance.new("Frame", ContentFrame)
+    tabFrame.Size = UDim2.new(1, 0, 1, 0)
+    tabFrame.BackgroundTransparency = 1
+    tabFrame.Visible = false
+    
+    button.MouseButton1Click:Connect(function()
+        if currentTab then currentTab.Visible = false end
+        tabFrame.Visible = true
+        currentTab = tabFrame
+    end)
+
+    table.insert(tabs, {button = button, frame = tabFrame})
+    return tabFrame, button
 end
 
--- RISK TAB
-do
-	local risk = contentFrames["Risk"]
+-- Função para toggle com som e mudança visual
+local function createToggleButton(parent, text, position)
+    local btn = createButton(parent, text, position)
+    local toggled = false
 
-	local title = Instance.new("TextLabel", risk)
-	title.Size = UDim2.new(1, -20, 0, 40)
-	title.Position = UDim2.new(0, 10, 0, 10)
-	title.Text = "⚠️ Tr1nX_777 que domina"
-	title.BackgroundTransparency = 1
-	title.TextColor3 = Color3.fromRGB(255, 0, 0)
-	title.Font = Enum.Font.GothamBlack
-	title.TextSize = 20
+    local function updateVisual()
+        if toggled then
+            btn.BackgroundColor3 = Color3.fromRGB(180, 20, 20)
+            btn.Text = text .. " [ON]"
+            soundOn:Play()
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            btn.Text = text .. " [OFF]"
+            soundOff:Play()
+        end
+    end
 
-	local moneyInput = Instance.new("TextBox", risk)
-	moneyInput.Size = UDim2.new(0, 200, 0, 35)
-	moneyInput.Position = UDim2.new(0, 20, 0, 60)
-	moneyInput.PlaceholderText = "Quanto dinheiro deseja gerar?"
-	moneyInput.Text = ""
-	moneyInput.TextColor3 = Color3.new(1,1,1)
-	moneyInput.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
-	moneyInput.Font = Enum.Font.GothamBold
-	moneyInput.TextSize = 14
-	local moneyCorner = Instance.new("UICorner", moneyInput)
-	moneyCorner.CornerRadius = UDim.new(0, 8)
+    btn.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        updateVisual()
+        -- Aqui você pode disparar eventos ou funções para ligar/desligar funcionalidade
+    end)
 
-	local confirmBtn = Instance.new("TextButton", risk)
-	confirmBtn.Size = UDim2.new(0, 220, 0, 35)
-	confirmBtn.Position = UDim2.new(0, 20, 0, 110)
-	confirmBtn.Text = "💸 Sim, por conta em risco"
-	confirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	confirmBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-	confirmBtn.Font = Enum.Font.GothamBlack
-	confirmBtn.TextSize = 14
-	local confirmCorner = Instance.new("UICorner", confirmBtn)
-	confirmCorner.CornerRadius = UDim.new(0, 8)
-
-	confirmBtn.MouseButton1Click:Connect(function()
-		local val = tonumber(moneyInput.Text)
-		if val then
-			print("Gerando dinheiro fake: R$"..val)
-			-- Aqui você adicionaria lógica real se o jogo deixasse
-		end
-	end)
+    updateVisual()
+    return btn, function() return toggled end
 end
+
+-- Criar abas
+local homeTab, homeBtn = createTab("Home")
+local outfitTab, outfitBtn = createTab("Outfit")
+local riskTab, riskBtn = createTab("Risk")
+
+-- Ajustar pai dos botões da aba
+homeBtn.Parent = TabHolder
+outfitBtn.Parent = TabHolder
+riskBtn.Parent = TabHolder
+
+-- -- -- -- -- HOME TAB -- -- -- -- --
+
+-- Toggle ESP
+local espToggle, isEspOn = createToggleButton(homeTab, "ESP", UDim2.new(0, 20, 0, 20))
+
+-- Toggle Fly (com animação macabra)
+local flyToggle, isFlyOn = createToggleButton(homeTab, "Fly", UDim2.new(0, 20, 0, 70))
+
+-- Função para animação de voo sombria
+local flying = false
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+local flyTweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+local flyTweenUp = TweenService:Create(rootPart, flyTweenInfo, {Position = rootPart.Position + Vector3.new(0, 5, 0)})
+local flyTweenDown = TweenService:Create(rootPart, flyTweenInfo, {Position = rootPart.Position - Vector3.new(0, 5, 0)})
+
+local flyingConnection
+
+local function startFlying()
+    flying = true
+
+    -- Som do voo
+    local flySound = createSound(rootPart, "rbxassetid://9118822200")
+    flySound.Looped = true
+    flySound.Volume = 0.3
+    flySound:Play()
+
+    flyingConnection = RunService.Heartbeat:Connect(function(step)
+        local newPos = rootPart.Position + Vector3.new(0, math.sin(tick() * 5) * 0.5, 0)
+        rootPart.CFrame = CFrame.new(newPos) * CFrame.Angles(0, tick(), 0)
+    end)
+
+    -- Visual macabro no personagem (exemplo: cor vermelha nos braços)
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.Material = Enum.Material.Neon
+            part.Color = Color3.fromRGB(180, 0, 0)
+        end
+    end
+end
+
+local function stopFlying()
+    flying = false
+    if flyingConnection then
+        flyingConnection:Disconnect()
+        flyingConnection = nil
+    end
+    -- Resetar material e cor para padrão
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.Material = Enum.Material.SmoothPlastic
+            part.Color = Color3.fromRGB(255, 255, 255)
+        end
+    end
+end
+
+flyToggle.MouseButton1Click:Connect(function()
+    if flying then
+        stopFlying()
+        soundOff:Play()
+    else
+        startFlying()
+        soundOn:Play()
+    end
+end)
+
+-- Teleporte simples
+local tpBox = Instance.new("TextBox", homeTab)
+tpBox.PlaceholderText = "Nome do Jogador"
+tpBox.Size = UDim2.new(0, 200, 0, 30)
+tpBox.Position = UDim2.new(0, 20, 0, 120)
+tpBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+tpBox.TextColor3 = Color3.new(1, 1, 1)
+tpBox.ClearTextOnFocus = false
+local cornerTp = Instance.new("UICorner", tpBox)
+cornerTp.CornerRadius = UDim.new(0, 6)
+
+local tpBtn = createButton(homeTab, "Teleportar", UDim2.new(0, 20, 0, 160))
+
+tpBtn.MouseButton1Click:Connect(function()
+    local targetName = tpBox.Text
+    local targetPlayer = Players:FindFirstChild(targetName)
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        rootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+        soundOn:Play()
+    else
+        soundOff:Play()
+    end
+end)
+
+-- -- -- -- -- OUTFIT TAB -- -- -- -- --
+
+local carrotBtn = createButton(outfitTab, "GRG STORE - Cenoura", UDim2.new(0, 20, 0, 20))
+local darkBtn = createButton(outfitTab, "tr1nx_777 - Roupa Macabra", UDim2.new(0, 20, 0, 70))
+
+carrotBtn.MouseButton1Click:Connect(function()
+    soundOn:Play()
+    -- Aqui insira código para aplicar roupa cenoura
+end)
+
+darkBtn.MouseButton1Click:Connect(function()
+    soundOn:Play()
+    -- Aqui insira código para aplicar roupa macabra
+end)
+
+-- -- -- -- -- RISK TAB -- -- -- -- --
+
+local desc = Instance.new("TextLabel", riskTab)
+desc.Text = "Tr1nX_777 que domina"
+desc.Size = UDim2.new(0, 260, 0, 30)
+desc.Position = UDim2.new(0, 20, 0, 20)
+desc.TextColor3 = Color3.fromRGB(255, 0, 0)
+desc.Font = Enum.Font.GothamBold
+desc.TextSize = 16
+desc.BackgroundTransparency = 1
+
+local moneyBtn = createButton(riskTab, "💸 Adicionar Dinheiro", UDim2.new(0, 20, 0, 70))
+moneyBtn.MouseButton1Click:Connect(function()
+    soundOn:Play()
+    -- Código para adicionar dinheiro aqui
+end)
+
+-- -- -- -- -- BOTÃO MINIMIZAR -- -- -- -- --
+
+local MiniBtn = createButton(Frame, "-", UDim2.new(1, -40, 0, 5))
+MiniBtn.Size = UDim2.new(0, 30, 0, 30)
+MiniBtn.TextSize = 24
+MiniBtn.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+
+local miniIcon = createButton(gui, "Th1x", UDim2.new(0, 20, 1, -60))
+miniIcon.Visible = false
+
+MiniBtn.MouseButton1Click:Connect(function()
+    Frame.Visible = false
+    miniIcon.Visible = true
+    soundOn:Play()
+end)
+
+miniIcon.MouseButton1Click:Connect(function()
+    Frame.Visible = true
+    miniIcon.Visible = false
+    soundOn:Play()
+end)
+
+-- Ativa a primeira aba automaticamente
+homeBtn.MouseButton1Click:Invoke()
+
